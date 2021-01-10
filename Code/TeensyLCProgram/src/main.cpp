@@ -21,7 +21,7 @@
 #include <SPI.h>
 #include <Wire.h>
 
-// display object initlizaation, as shown in the example code
+// display object initlizaation, as shown in the example code; USES SPI1
 Adafruit_ST7735 tft = Adafruit_ST7735(&SPI1, TFT_CS, TFT_DC, TFT_RST);
 
 // usb object initialization, as shown in the example code
@@ -33,12 +33,19 @@ PS3BT PS3(&Btd, 0x5C, 0xF3, 0x70, 0x9D, 0x84, 0x81);  // actual bluetooth addres
 
 #define I2CBYTES  17
 
-// the array that stores controller data
+// the array that stores controller data; could be a struct instead, but is read as an array by the CoprocessorTalk library so better for continuity.
+// Array indexes are all defined there as well.
 volatile uint8_t array[I2CBYTES] = {0};
+
+// robot mode, received from a ping from the teensy 4.1 and shown on the display
+volatile uint8_t mode = 100;                   // random value (the same one used to intialize previousMode in displayStatus) so that new modes != previous modes when mdoes haven't been set yet
+volatile bool updateModeFlag = false;          // flag for when mode data is received from teensy 4.1, used in slaveReceiveHandler();
 
 // function forward declarations
 void masterRequestHandler();
-void displayContollerStatus();
+void slaveReceiveHandler(int incomingBytes);
+
+void displayStatus();
 
 void setup() {
   Serial.begin(9600);
@@ -53,13 +60,16 @@ void setup() {
   // join the I2C bus with the teensy 4.1 and set request handler
   Wire.begin(SLAVE_ADDRESS);
   Wire.onRequest(masterRequestHandler);
+  Wire.onReceive(slaveReceiveHandler);
 
-  // initialize the display
+  // initialize the display and setup permanent text 
   tft.initR(INITR_BLACKTAB);      // Init ST7735S chip, black tab
   tft.setRotation(1);             // rotate the screen to "landscape"
   tft.fillScreen(ST7735_BLACK);
   tft.setCursor(10, 10);
   tft.print("PS3 connected: ");
+  tft.setCursor(10, 25);
+  tft.print("Mode: ");
 }
 void loop() {
   Usb.Task();
@@ -71,6 +81,7 @@ void loop() {
     if (PS3.getButtonClick(PS))
       PS3.disconnect();
 
+    // joysticks
     array[1] = PS3.getAnalogHat(LeftHatX);
     array[2] = PS3.getAnalogHat(LeftHatY);
     array[3] = PS3.getAnalogHat(RightHatX);
@@ -102,18 +113,41 @@ void loop() {
 
   }
   
-  displayContollerStatus();
+  displayStatus();
   
 }
 
+// send controller data upon request
 void masterRequestHandler() {
   Wire.write((const uint8_t *) array, I2CBYTES);
 }
 
 
-void displayContollerStatus() {
+/* In the future, I may want to receive status data from the main processor, like numbers
+(for certain control modes) or simple error messages. Different data requires a different 
+variable type, obviously, so first my function will expect a number (pingType) to know what
+will be received. Depending on this, I can read the following data into different variables. 
+For now, I'll only to the mode because this is simple and a good example (I also don't have 
+any error messages because I haven't written anything yet :/ ). To add more, please declare a new
+global variable (must be global and volatile for the interrupt) and add the functionality in 
+void displayStatus. This will update everything (a new variable requires a new pointer to be added) 
+depending on whether the updateModeFlag is true, which will be set true when anything is received
+from the teensy 4.1. The pingType [s] should be #defines in the Coprocessor.h library accessible
+to the teensy 4.1*/
+void slaveReceiveHandler(int incomingBytes) {
+  int pingType = Wire.read()   ;
+  if (pingType == 0) {          // then a mode update is being received       
+    mode = Wire.read();         // mode is one number
+  }
+  updateModeFlag = true;
+}
+
+
+void displayStatus() {
   static int previousConnectionStatus = 1;        // set to 1, so that this function is run once when controller isn't connected yet
-  
+  static bool previousMode = 100;                 // 100 is a random number so that modes will update the first time they are set (previousMode != mode)
+
+
   if ((millis() % 500 == 0) && previousConnectionStatus != array[0]) {
     
     tft.setCursor(100, 10);
@@ -128,7 +162,15 @@ void displayContollerStatus() {
       tft.setTextColor(ST7735_RED);
       tft.print("False");
     }
-    
   }
-}
 
+  // update modes if necessary (responds to slaveReceiveHandler())
+  if ((updateModeFlag == true) && (previousMode != mode)) {
+    tft.setCursor(50,26);
+    tft.setTextColor(ST7735_BLUE);
+    tft.fillRect(50, 26, 15, 7, ST7735_BLACK);
+    tft.print(mode);
+  }
+  previousMode = mode;
+  updateModeFlag = false;
+}
