@@ -42,7 +42,7 @@ bool CoprocessorTalk::retrieveData(void) {        // this is a bool, so that I c
     return true;                         // NULL received; controller isn't connected, or data hasn't been acquired yet on Slave
   else {
     if (_serialFeedbackOK)
-      Serial.println("no data recieved: controller not connected, or coprocessor not ready yet- from library");
+      Serial.println("no data recieved: controller not connected, or coprocessor not ready yet; Returned from CoprocessorTalk");
     return false;
   }
 };
@@ -67,4 +67,19 @@ bool CoprocessorTalk::controllerInputChanged(uint8_t inputType) {
     return true;
   else
     return false;
+}
+
+// I don't like the way that this is written... will become messy when there are more modes to set; fix if necessary
+void CoprocessorTalk::write(uint8_t message) {
+  if (message == SET_MODE_0) {
+    Wire.beginTransmission(_slaveAddress);
+    Wire.write(0);          // 0 is the ping address that tells the Teensy LC that a mode is being set
+    Wire.write(message);    // in this case, it is setting the mode to 0 as well
+    Wire.endTransmission();
+
+    if (_serialFeedbackOK) {
+      String output = "Mode " + String(message) + " Set";
+      Serial.println(output);
+    }
+  }
 }

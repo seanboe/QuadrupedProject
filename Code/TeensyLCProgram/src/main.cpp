@@ -38,15 +38,14 @@ PS3BT PS3(&Btd, 0x5C, 0xF3, 0x70, 0x9D, 0x84, 0x81);  // actual bluetooth addres
 volatile uint8_t array[I2CBYTES] = {0};
 
 // robot mode, received from a ping from the teensy 4.1 and shown on the display
-volatile uint8_t mode;
+volatile uint8_t mode = 100;                   // random value (the same one used to intialize previousMode in displayStatus) so that new modes != previous modes when mdoes haven't been set yet
 volatile bool updateModeFlag = false;          // flag for when mode data is received from teensy 4.1, used in slaveReceiveHandler();
 
 // function forward declarations
 void masterRequestHandler();
 void slaveReceiveHandler(int incomingBytes);
 
-void displayControllerStatus();
-void updateStats();
+void displayStatus();
 
 void setup() {
   Serial.begin(9600);
@@ -114,12 +113,11 @@ void loop() {
 
   }
   
-  displayControllerStatus();
-  updateStats();
+  displayStatus();
   
 }
 
-
+// send controller data upon request
 void masterRequestHandler() {
   Wire.write((const uint8_t *) array, I2CBYTES);
 }
@@ -132,22 +130,24 @@ will be received. Depending on this, I can read the following data into differen
 For now, I'll only to the mode because this is simple and a good example (I also don't have 
 any error messages because I haven't written anything yet :/ ). To add more, please declare a new
 global variable (must be global and volatile for the interrupt) and add the functionality in 
-void updateStats. This will update everything (a new variable requires a new pointer to be added) 
+void displayStatus. This will update everything (a new variable requires a new pointer to be added) 
 depending on whether the updateModeFlag is true, which will be set true when anything is received
 from the teensy 4.1. The pingType [s] should be #defines in the Coprocessor.h library accessible
 to the teensy 4.1*/
 void slaveReceiveHandler(int incomingBytes) {
   int pingType = Wire.read()   ;
-  if (pingType == 0) {
-    mode = Wire.read();               // mode is one number
+  if (pingType == 0) {          // then a mode update is being received       
+    mode = Wire.read();         // mode is one number
   }
   updateModeFlag = true;
 }
 
 
-void displayControllerStatus() {
+void displayStatus() {
   static int previousConnectionStatus = 1;        // set to 1, so that this function is run once when controller isn't connected yet
-  
+  static bool previousMode = 100;                 // 100 is a random number so that modes will update the first time they are set (previousMode != mode)
+
+
   if ((millis() % 500 == 0) && previousConnectionStatus != array[0]) {
     
     tft.setCursor(100, 10);
@@ -162,19 +162,15 @@ void displayControllerStatus() {
       tft.setTextColor(ST7735_RED);
       tft.print("False");
     }
-    
   }
-}
 
-
-// updates stats on the display to whatever has been ping-ed from teensy 4.1; no pointers because all the variables are volatile anyway (volatile has no pass-by-reference)
-void updateStats() {
-  if (updateModeFlag) {
+  // update modes if necessary (responds to slaveReceiveHandler())
+  if ((updateModeFlag == true) && (previousMode != mode)) {
     tft.setCursor(50,26);
     tft.setTextColor(ST7735_BLUE);
     tft.fillRect(50, 26, 15, 7, ST7735_BLACK);
     tft.print(mode);
   }
+  previousMode = mode;
   updateModeFlag = false;
 }
-

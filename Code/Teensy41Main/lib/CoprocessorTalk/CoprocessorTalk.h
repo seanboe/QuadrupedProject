@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+// Definitions for messages/modes/stuff that needs to be sent to Teensy LC
+#define SET_MODE_0 0
+
 // Definitions for buttons/hats on controller
 #define LEFT_X 1
 #define LEFT_Y 2
@@ -44,6 +47,7 @@ class CoprocessorTalk {
     bool controllerConnected(void);
     int getControllerInput(int inputType);                // returns state of all controller inputs
     bool controllerInputChanged(uint8_t intputType);          // whether an input changed; returns true once, when there is a change. Probably most useful for buttons, but may work with all inputs
+    void write(uint8_t message);
 };
 
 #endif
