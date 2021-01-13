@@ -29,6 +29,11 @@ USB Usb;
 BTD Btd(&Usb); 
 PS3BT PS3(&Btd, 0x5C, 0xF3, 0x70, 0x9D, 0x84, 0x81);  // actual bluetooth address from dongle - set ENABLE_UHS_DEBUGGING to 1 in settings.h
 
+// analog pins reading dropped-down battery voltages (front and rear batteries)
+#define FBATT_PIN 15
+#define RBATT_PIN 14
+#define DROP_FACTOR 0.333333333       // voltage has been dropped down by 67%, therefore incoming voltage is 33% of actual voltage, so divide incoming by 0.33.
+
 #define SLAVE_ADDRESS  8    // this device's address, for I2C
 
 #define I2CBYTES  17
@@ -44,8 +49,9 @@ volatile bool updateModeFlag = false;          // flag for when mode data is rec
 // function forward declarations
 void masterRequestHandler();
 void slaveReceiveHandler(int incomingBytes);
+float readBattVoltage(uint8_t batteryPin);
 
-void displayStatus();
+void displayStatus(float battVoltageF, float battVoltageR);
 
 void setup() {
   Serial.begin(9600);
@@ -62,6 +68,11 @@ void setup() {
   Wire.onRequest(masterRequestHandler);
   Wire.onReceive(slaveReceiveHandler);
 
+  // battery voltage reading pins
+  pinMode(FBATT_PIN, INPUT);
+  pinMode(RBATT_PIN, INPUT);
+
+
   // initialize the display and setup permanent text 
   tft.initR(INITR_BLACKTAB);      // Init ST7735S chip, black tab
   tft.setRotation(1);             // rotate the screen to "landscape"
@@ -70,7 +81,12 @@ void setup() {
   tft.print("PS3 connected: ");
   tft.setCursor(10, 25);
   tft.print("Mode: ");
+  tft.setCursor(10, 110);
+  tft.print("Batt 1: ");
+  tft.setCursor(85, 110);
+  tft.print("Batt 2: ");
 }
+
 void loop() {
   Usb.Task();
 
@@ -113,9 +129,10 @@ void loop() {
 
   }
   
-  displayStatus();
+  displayStatus(readBattVoltage(FBATT_PIN), readBattVoltage(RBATT_PIN));
   
 }
+
 
 // send controller data upon request
 void masterRequestHandler() {
@@ -143,7 +160,7 @@ void slaveReceiveHandler(int incomingBytes) {
 }
 
 
-void displayStatus() {
+void displayStatus(float battVoltageF, float battVoltageR) {
   static int previousConnectionStatus = 1;        // set to 1, so that this function is run once when controller isn't connected yet
   static bool previousMode = 100;                 // 100 is a random number so that modes will update the first time they are set (previousMode != mode)
 
@@ -173,4 +190,50 @@ void displayStatus() {
   }
   previousMode = mode;
   updateModeFlag = false;
+
+
+  // // update voltage displayed on screen
+  // if (millis() % 5000 == 0) {
+  //   tft.fillRect(55, 110, 30, 7, ST7735_BLACK);
+  //   if (battVoltageF < 6.5) {          // 6.5 is roughly the minimum safe voltage for a 2s lipo
+  //     tft.setTextColor(ST7735_RED);
+  //   }
+  //   else 
+  //     tft.setTextColor(ST7735_GREEN);
+  //   tft.setCursor(55, 110);
+  //   tft.print(battVoltageF);
+
+  //   // rear battery
+  //   tft.fillRect(130, 110, 40, 7, ST7735_BLACK);
+  //   if (battVoltageR < 6.5)           // 6.5 is roughly the minimum safe voltage for a 2s lipo
+  //     tft.setTextColor(ST7735_RED);
+  //   else 
+  //     tft.setTextColor(ST7735_GREEN);     
+  //   tft.setCursor(130, 110);
+  //   tft.print(battVoltageR);
+
+  //   if (array[0] == 1) {
+  //     if (battVoltageF < 6.5 && battVoltageR < 6.5)
+  //       PS3.setRumbleOn(RumbleHigh);
+  //     else if (battVoltageF < 6.5 || battVoltageR < 6.5)
+  //       PS3.setRumbleOn(RumbleLow);
+  //   }
+  // }
+
 }
+
+
+// reads incoming voltage on an analog pin that has been stepped down from a main lipo battery
+float readBattVoltage(uint8_t batteryPin) {
+  float incomingVolts = analogRead(batteryPin);
+  incomingVolts = map(incomingVolts, 0, 1023, 0, 3.3); // 3.3 volt max, anythign past that should break the teensy... so... 
+
+  // solve for the actual voltage of the battery
+  incomingVolts /= DROP_FACTOR;         // using Ohm's law, R2/(R1+R2) * Vin = Vout <- incoming volts. DROP_FACTOR = R2/(R1+R2)
+
+  // make sure that it is 2 decimal places only
+  incomingVolts = (int)(incomingVolts * 100);
+
+  return (float)(incomingVolts / 100);
+}
+
