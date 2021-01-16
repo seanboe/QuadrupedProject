@@ -192,7 +192,8 @@ void displayStatus(float battVoltageF, float battVoltageR) {
   updateModeFlag = false;
 
 
-  // // update voltage displayed on screen
+  // update voltage displayed on screen and turn on Rumble accordingly
+
   // if (millis() % 5000 == 0) {
   //   tft.fillRect(55, 110, 30, 7, ST7735_BLACK);
   //   if (battVoltageF < 6.5) {          // 6.5 is roughly the minimum safe voltage for a 2s lipo
