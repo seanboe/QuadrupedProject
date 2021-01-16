@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+
 // Constructor
 CoprocessorTalk::CoprocessorTalk(int slaveAddress, int dataIndexCount, bool serialFeedbackOK) { 
   _slaveAddress = slaveAddress;
@@ -13,17 +14,21 @@ CoprocessorTalk::CoprocessorTalk(int slaveAddress, int dataIndexCount, bool seri
   }
 };
 
-// Private Functions
+
+//*****************Private Functions*****************
+
 int CoprocessorTalk::_isTypeAnalog(uint8_t inputType) {
-  if ((inputType == 1) || (inputType == 2) || (inputType == 3) || (inputType == 4))
+  if ((inputType == LEFT_X) || (inputType == LEFT_Y) || (inputType == RIGHT_X) || (inputType == RIGHT_Y))
     return 1;         // analog input; joystick, which are much less stable/consistent than the triggers and require an offset
-  else if ((inputType == 6) || (inputType == 8))
+  else if ((inputType == L2) || (inputType == R2))
     return 2;         // analog input, but it's a trigger (R2, L2), which are much more stable than Joysticks and consistently return 0 when not pressed
   else
     return 0;         // not an anlog input; a button
 }
 
-// Public Functions
+
+//*****************Public Functions*****************
+
 bool CoprocessorTalk::retrieveData(void) {        // this is a bool, so that I can halt main when the controller is disconnected
   for (int x = 0; x < _dataIndexCount; x++) {         // update the previous data, so that controllerInputChanged works
     _previousDataArray[x] = _currentDataArray[x];
@@ -47,6 +52,7 @@ bool CoprocessorTalk::retrieveData(void) {        // this is a bool, so that I c
   }
 };
 
+
 bool CoprocessorTalk::controllerConnected(void) {
   if (_currentDataArray[0] == 0)
     return false;
@@ -54,20 +60,40 @@ bool CoprocessorTalk::controllerConnected(void) {
     return true;
 };
 
+
 int CoprocessorTalk::getControllerInput(int inputType) {
-  return _currentDataArray[inputType];
+  if ((inputType == TRIGGERS) && (_triggersJoined == true)) {
+    int mapR2Val = _currentDataArray[R2];
+    int mapL2Val = _currentDataArray[L2];
+    
+    if (_r2Up)
+      mapR2Val = map(mapR2Val, 0, 255, 0, 125);         // 255 - 130 = 125 ; 130 is TRIGGER_CENTER_POS
+    else 
+      mapR2Val = -1 * (map(mapR2Val, 0, 255, 0, TRIGGER_CENTER_POS));
+    if (_l2Up)
+      mapL2Val = map(mapL2Val, 0, 255, 0, 125);         // 255 - 130 = 125 ; 130 is TRIGGER_CENTER_POS
+    else 
+      mapL2Val = -1 * (map(mapL2Val, 0, 255, 0, TRIGGER_CENTER_POS));
+
+    return (mapR2Val + mapL2Val) + TRIGGER_CENTER_POS;
+
+  }
+  else 
+    return _currentDataArray[inputType];
 };
+
 
 bool CoprocessorTalk::controllerInputChanged(uint8_t inputType) {
   // buttons and triggers first; these have only 2 states so offset isn't necessary
-  if ((_currentDataArray[inputType] != _previousDataArray[inputType]) && ((_isTypeAnalog(inputType) == 0)|| _isTypeAnalog(inputType) == 2))
+  if ((_currentDataArray[inputType] != _previousDataArray[inputType]) && ((_isTypeAnalog(inputType) == 0) || _isTypeAnalog(inputType) == 2))
     return true;
   // analog inputs, joysticks only because triggers are much more consistent
   else if ((_isTypeAnalog(inputType) == 1) && (abs(_currentDataArray[inputType] - _previousDataArray[inputType])) > JOYSTICK_OFFSET)
     return true;
   else
     return false;
-}
+};
+
 
 // I don't like the way that this is written... will become messy when there are more modes to set; fix if necessary
 void CoprocessorTalk::write(uint8_t message) {
@@ -78,8 +104,15 @@ void CoprocessorTalk::write(uint8_t message) {
     Wire.endTransmission();
 
     if (_serialFeedbackOK) {
-      String output = "Mode " + String(message) + " Set";
+      String output = "Mode " + String(message) + " Set";         // sprintf not working here... fix later maybe (if necessary)
       Serial.println(output);
     }
   }
+};
+
+
+void CoprocessorTalk::joinTriggers(bool l2Up, bool r2Up) {
+  _l2Up = l2Up;
+  _r2Up = r2Up;
+  _triggersJoined = true;         // while this is technically not necessary, I think it makes things more readable
 }

@@ -14,12 +14,15 @@ void setup() {
   Wire.begin();
 
   while(!teensyLC.retrieveData());            // halt while controller isn't connected
-  teensyLC.write(SET_MODE_0);          
+  teensyLC.write(SET_MODE_0);      
+
+  teensyLC.joinTriggers();    
 }
 
 void loop() {
   while(!teensyLC.retrieveData());            // halt while controller isn't connected
-  for (int x = 0; x < DATA_INDEX_COUNT; x++) {
-    Serial.println(teensyLC.getControllerInput(x));
-  }
+  // for (int x = 0; x < DATA_INDEX_COUNT; x++) {
+  //   Serial.println(teensyLC.getControllerInput(x));
+  // }
+  Serial.println(teensyLC.getControllerInput(TRIGGERS));          // left trigger (going down) not working
 }
