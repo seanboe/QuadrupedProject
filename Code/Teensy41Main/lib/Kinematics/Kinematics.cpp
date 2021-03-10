@@ -37,7 +37,7 @@ void Kinematics::applyVerticalTranslation(uint8_t controllerInput) {
   if ((_legID == LEG_2) || (_legID == LEG_3)) {
 
     // Step 1: Map input to demand shoulder-foot length in cm
-    uint16_t demandShoulderToFoot = map(controllerInput, 0, 255, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);
+    uint16_t demandShoulderToFoot = map(controllerInput, 0, 255, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);         //MOVE THIS LINE SOMEWHERE ELSE
 
 
     // Step 2: use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
