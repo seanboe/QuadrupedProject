@@ -4,15 +4,19 @@
 
 #include <Servo.h>
 
-#define LEG_LENGTH 10
+#include <Ramp.h>
 
-Kinematics leg2(2, 0, 90, 75, 135, 25, 90);
+#define TIME_ANGLE_GRADIENT 
+
+Kinematics leg2(2, 0, 90, 75, 135, 55, 90);
 Servo L2M2;
 Servo L2M3;
 
 void setup() {
   Serial.begin(9600);
   // while (!Serial)
+
+  pinMode(19, INPUT);
 
   L2M2.attach(0);
   L2M3.attach(1);
@@ -28,13 +32,15 @@ void setup() {
 
 void loop() {
   if (millis() % 100 == 0)
-    leg2.printStatusString();
+    // leg2.printStatusString();
 
-  leg2.applyVerticalTranslation(LEG_LENGTH);
+  leg2.applyVerticalTranslation(analogRead(19));
 
   // write calculated data to servos
   L2M2.writeMicroseconds(leg2.motor2.angleMicros);
   L2M3.writeMicroseconds(leg2.motor3.angleMicros);
+
+
 }
 
 

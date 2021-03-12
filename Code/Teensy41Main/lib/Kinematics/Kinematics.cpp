@@ -32,13 +32,13 @@ uint16_t Kinematics::_degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset)
 
 // *****************Public Functions*****************
 
-void Kinematics::applyVerticalTranslation(uint8_t controllerInput) {
+void Kinematics::applyVerticalTranslation(uint16_t controllerInput) {
   
   if ((_legID == LEG_2) || (_legID == LEG_3)) {
 
     // Step 1: Map input to demand shoulder-foot length in cm
-    uint16_t demandShoulderToFoot = map(controllerInput, 0, 255, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);         //MOVE THIS LINE SOMEWHERE ELSE
-
+    uint16_t demandShoulderToFoot = map(controllerInput, 0, 1023, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);         //MOVE THIS LINE SOMEWHERE ELSE
+// Serial.println(demandShoulderToFoot);
 
     // Step 2: use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
     double demandAngle3 = acos( ( pow(demandShoulderToFoot, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
@@ -56,18 +56,9 @@ void Kinematics::applyVerticalTranslation(uint8_t controllerInput) {
 
 
     // Step 5: apply motor angular constraints
+    demandAngle2 = _applyConstraints(2, demandAngle2);
+    demandAngle3 = _applyConstraints(3, demandAngle3);
 
-    // motor 2:
-    if (demandAngle2 > M2_MAX)
-      demandAngle2 = M2_MAX;
-    else if (demandAngle2 < M2_MIN)
-      demandAngle2 = M2_MIN;
-    
-    // motor 3:
-    if (demandAngle3 > M3_MAX)
-      demandAngle3 = M3_MAX;
-    else if (demandAngle3 < M3_MIN) 
-      demandAngle3 = M3_MIN;
 
     // Step 6: set live motor angles to the newly calculated ones
 
@@ -82,6 +73,34 @@ void Kinematics::applyVerticalTranslation(uint8_t controllerInput) {
   }
 
 };
+
+double Kinematics::_applyConstraints(uint8_t motor, double demandAngle) {
+  if (motor == 2) {
+    if (demandAngle > M2_MAX){
+      return M2_MAX;
+    }
+    else if (demandAngle < M2_MIN){
+      return M2_MIN;
+    }
+    else
+      return demandAngle;
+  }
+  else if (motor == 3) {
+    if (demandAngle > M3_MAX) {
+      return M3_MAX;
+    }
+    else if (demandAngle < M3_MIN) {
+      return M3_MIN;
+    }
+    else 
+      return demandAngle;
+  }
+  else
+    if (Serial)
+      Serial.println("Motor argument in _apply constraints wrong, so constraints can't be applied! Terminating program.");
+    while(1);         // terminate the program to avoid unpredictable movement (which could break stuff)
+    return demandAngle;
+}
 
 
 bool Kinematics::printStatusString() {
