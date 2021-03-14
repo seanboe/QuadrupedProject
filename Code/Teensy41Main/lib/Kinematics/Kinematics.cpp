@@ -64,13 +64,8 @@ void Kinematics::updateDynamicEndpoint() {
     dynamicMotor1Angle.go(motor1.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
   }
   if (motor2.previousDegrees != motor2.angleDegrees) {
-        // Serial.println("NEW ENDPOINT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        // Serial.println(motor2.angleDegrees);
-        // Serial.println(motor2.previousDegrees);
     motor2.previousDegrees = motor2.angleDegrees;
     dynamicMotor2Angle.go(motor2.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
-            // Serial.println(motor2.previousDegrees);
-            // Serial.println();
   }
   if (motor3.previousDegrees != motor3.angleDegrees) {
     motor3.previousDegrees = motor3.angleDegrees;

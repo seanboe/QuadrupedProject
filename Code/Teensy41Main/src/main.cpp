@@ -11,7 +11,7 @@ rampInt myRamp;
 uint16_t dynamicAngle;
 uint16_t demandAngle;
 
-Kinematics leg2(2, 0, 90, 125, 135, 55, 90);
+Kinematics leg2(2, 150, 90, 125, 135, 55, 90);
 Servo L2M2;
 Servo L2M3;
 
@@ -42,19 +42,19 @@ void loop() {
     // leg2.printStatusString();
 
   // leg2.applyVerticalTranslation(analogRead(19));
-  leg2.applyVerticalTranslation(myRamp.update());
+  // leg2.applyVerticalTranslation(myRamp.update());
   // leg2.applyVerticalTranslation(1000);
   // leg2.applyVerticalTranslation(read());
 
   if (Serial.available()) {
     unsigned int amount = Serial.parseInt();
-    // leg2.applyVerticalTranslation(amount);
+    leg2.applyVerticalTranslation(amount);
   }
 
 
     if (millis() % 10 == 0) {
-      dynamicAngle = leg2.getDyamicAngle(M2, DEGREES);
-      demandAngle = leg2.motor2.angleDegrees;
+      dynamicAngle = leg2.getDyamicAngle(M3, DEGREES);
+      demandAngle = leg2.motor3.angleDegrees;
       Serial.println(dynamicAngle);
       Serial.print(",");
       Serial.println(demandAngle);
