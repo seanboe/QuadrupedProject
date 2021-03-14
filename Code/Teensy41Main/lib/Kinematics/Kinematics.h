@@ -9,7 +9,6 @@
 
 typedef struct {
   uint16_t angleDegrees;
-  uint16_t dynamicDegrees;      // interpolated degrees with angleDegrees for reference endpoint
   uint16_t previousDegrees;     // previous degrees since last call to updateDynamicPositions()
   uint16_t angleMicros;
   uint16_t calibOffset;
@@ -46,7 +45,7 @@ class Kinematics {
     uint16_t getDyamicAngle(motorID motorID, unitType unit);
 
     // calculates all relevant motor angles (the angles of motors 2 & 3) to achieve vertical translation
-    void applyVerticalTranslation(uint16_t controllerInput);
+    void solveFtShldrLength(uint16_t controllerInput);
 
     // calculates M2 angle offset to achieve a foward translation in the x direction
     void applyForwardTranslation(uint16_t controllerInput);

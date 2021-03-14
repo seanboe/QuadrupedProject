@@ -41,14 +41,14 @@ void setup() {
 void loop() {
     // leg2.printStatusString();
 
-  // leg2.applyVerticalTranslation(analogRead(19));
-  // leg2.applyVerticalTranslation(myRamp.update());
-  // leg2.applyVerticalTranslation(1000);
-  // leg2.applyVerticalTranslation(read());
+  // leg2.solveFtShldrLength(analogRead(19));
+  // leg2.solveFtShldrLength(myRamp.update());
+  // leg2.solveFtShldrLength(1000);
+  // leg2.solveFtShldrLength(read());
 
   if (Serial.available()) {
     unsigned int amount = Serial.parseInt();
-    leg2.applyVerticalTranslation(amount);
+    leg2.solveFtShldrLength(amount);
   }
 
 

@@ -25,13 +25,10 @@ Kinematics::Kinematics(uint8_t legID, uint16_t motor1CalibOffset, uint16_t motor
 
   // set initial dyanamic angles to start positions
   dynamicMotor1Angle.go(motor1StartPos);
-  // motor1.dynamicDegrees = dynamicMotor1Angle.update();
 
   dynamicMotor2Angle.go(motor2StartPos);
-  // motor2.dynamicDegrees = dynamicMotor2Angle.update();
 
   dynamicMotor3Angle.go(motor3StartPos);
-  // motor3.dynamicDegrees = dynamicMotor3Angle.update();
 
 };
 
@@ -71,7 +68,6 @@ void Kinematics::updateDynamicEndpoint() {
     motor3.previousDegrees = motor3.angleDegrees;
     dynamicMotor3Angle.go(motor3.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
   }
-
 };
 
 uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
@@ -101,7 +97,7 @@ uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
 };
 
 
-void Kinematics::applyVerticalTranslation(uint16_t controllerInput) {
+void Kinematics::solveFtShldrLength(uint16_t controllerInput) {
   
   if ((_legID == LEG_2) || (_legID == LEG_3)) {
 
