@@ -4,8 +4,12 @@
 // degrees to microseconds sale factor (determined experimentally, MUST be the same for every motor)
 #define DEGREES_TO_MICROS 7.5
 
-// Maximum motor speed; millis per 180 degrees factor (determined experimentally) this is 0.6 sec / 180 degrees (actual value is 0.52 sec)
-#define MAX_SPEED 3.33
+// Maximum motor speed; millis per 180 degrees factor; NOT DEGREES PER MILLIS I.E. SPEED (determined experimentally) this is 0.6 sec / 180 degrees (actual value is 0.52 sec)
+#define MAX_SPEED_INVERSE 3
+
+typedef enum {
+  DEGREES, MILLIS
+} unitType;
 
 
 // leg numbering
@@ -15,10 +19,10 @@
 #define LEG_4 4
 
 
-// motor numbering
-#define M1 1
-#define M2 2
-#define M3 3
+// motor enums
+typedef enum {
+  M1, M2, M3
+} motorID;
 
 
 

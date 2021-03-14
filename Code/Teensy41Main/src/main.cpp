@@ -4,17 +4,22 @@
 
 #include <Servo.h>
 
-#include <Ramp.h>
+#include "Ramp.h"
+rampInt myRamp;
 
-#define TIME_ANGLE_GRADIENT 
 
-Kinematics leg2(2, 0, 90, 75, 135, 55, 90);
+uint16_t dynamicAngle;
+uint16_t demandAngle;
+
+Kinematics leg2(2, 150, 90, 125, 135, 55, 90);
 Servo L2M2;
 Servo L2M3;
 
+float read();
+
 void setup() {
   Serial.begin(9600);
-  // while (!Serial)
+  while (!Serial)
 
   pinMode(19, INPUT);
 
@@ -28,24 +33,55 @@ void setup() {
   
   delay(3000);
 
+  myRamp.go(0);
+  myRamp.go(1000, 1000, LINEAR, FORTHANDBACK);
+
 }
 
 void loop() {
-  if (millis() % 100 == 0)
     // leg2.printStatusString();
 
-  leg2.applyVerticalTranslation(analogRead(19));
+  // leg2.applyVerticalTranslation(analogRead(19));
+  // leg2.applyVerticalTranslation(myRamp.update());
+  // leg2.applyVerticalTranslation(1000);
+  // leg2.applyVerticalTranslation(read());
+
+  if (Serial.available()) {
+    unsigned int amount = Serial.parseInt();
+    leg2.applyVerticalTranslation(amount);
+  }
+
+
+    if (millis() % 10 == 0) {
+      dynamicAngle = leg2.getDyamicAngle(M3, DEGREES);
+      demandAngle = leg2.motor3.angleDegrees;
+      Serial.println(dynamicAngle);
+      Serial.print(",");
+      Serial.println(demandAngle);
+    }
+    // L2M2.writeMicroseconds(leg2.motor2.angleMicros);
+    // L2M3.writeMicroseconds(leg2.motor3.angleMicros);
 
   // write calculated data to servos
-  L2M2.writeMicroseconds(leg2.motor2.angleMicros);
-  L2M3.writeMicroseconds(leg2.motor3.angleMicros);
-
+  L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
+  L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
 
 }
 
 
+float read() {
+  int read1 = analogRead(19);
+  delay(1);
+  int read2 = analogRead(19);
+  delay(1);
+  int read3 = analogRead(19);
+  delay(1);
 
+  float result = ((float)read1 + (float)read2 + (float)read3)/3.0;
 
+  return result;
+
+}
 
 
 

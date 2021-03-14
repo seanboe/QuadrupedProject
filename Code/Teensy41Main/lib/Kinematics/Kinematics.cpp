@@ -2,22 +2,36 @@
 
 #include <Arduino.h>
 
-Kinematics::Kinematics(uint8_t legID, uint16_t motor1CalibOffset, uint8_t motor1StartPos, uint16_t motor2CalibOffset, uint8_t motor2StartPos, uint16_t motor3CalibOffset, uint8_t motor3StartPos) {
+Kinematics::Kinematics(uint8_t legID, uint16_t motor1CalibOffset, uint16_t motor1StartPos, uint16_t motor2CalibOffset, uint16_t motor2StartPos, uint16_t motor3CalibOffset, uint16_t motor3StartPos) {
   _legID = legID;
   _shoulderFootLength = sqrt( (LIMB_2^2) + (LIMB_3^2) );   // default leg length
 
   // motor defintions
   motor1.angleDegrees = motor1StartPos;
+  motor1.previousDegrees = 360;         // 0 is a magic number. It just must be different than the start positions so that a call to updateDynamicPositions() works
   motor1.angleMicros = _degreesToMicros(motor1StartPos, motor1CalibOffset);
   motor1.calibOffset = motor1CalibOffset;
 
   motor2.angleDegrees = motor2StartPos;
+  motor2.previousDegrees = 360;
   motor2.angleMicros = _degreesToMicros(motor2StartPos, motor2CalibOffset);
   motor2.calibOffset = motor2CalibOffset;
 
   motor3.angleDegrees = motor3StartPos;
+  motor2.previousDegrees = 360;
   motor3.angleMicros = _degreesToMicros(motor3StartPos, motor3CalibOffset);
   motor3.calibOffset = motor3CalibOffset;
+
+
+  // set initial dyanamic angles to start positions
+  dynamicMotor1Angle.go(motor1StartPos);
+  // motor1.dynamicDegrees = dynamicMotor1Angle.update();
+
+  dynamicMotor2Angle.go(motor2StartPos);
+  // motor2.dynamicDegrees = dynamicMotor2Angle.update();
+
+  dynamicMotor3Angle.go(motor3StartPos);
+  // motor3.dynamicDegrees = dynamicMotor3Angle.update();
 
 };
 
@@ -31,6 +45,61 @@ uint16_t Kinematics::_degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset)
 
 
 // *****************Public Functions*****************
+
+void Kinematics::updateDynamicEndpoint() {
+
+  // Determine which demanded angle is largestand use this to compute demand time for interpolation to be completed.
+  // uint16_t demandTime = MAX_SPEED * max(max(motor1.angleDegrees, motor2.angleDegrees), motor3.angleDegrees);      //PROBLEM; SHOULD BE BASED ON ANGLES NEEDED TO TRAVEL
+
+  // uint16_t demandTime = 500;
+  uint16_t motor1AngleDelta = abs(motor1.angleDegrees - motor1.previousDegrees);
+  uint16_t motor2AngleDelta = abs(motor2.angleDegrees - motor2.previousDegrees);
+  uint16_t motor3AngleDelta = abs(motor3.angleDegrees - motor3.previousDegrees);
+  uint16_t demandTime = lrint(MAX_SPEED_INVERSE * max(max(motor1AngleDelta, motor2AngleDelta), motor3AngleDelta));      //PROBLEM; SHOULD BE BASED ON ANGLES NEEDED TO TRAVEL
+
+
+    // determine whether motor angles have been updated i.e. new end angle, and update final positions accordingly
+  if (motor1.previousDegrees != motor1.angleDegrees) {
+    motor1.previousDegrees = motor1.angleDegrees;
+    dynamicMotor1Angle.go(motor1.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
+  }
+  if (motor2.previousDegrees != motor2.angleDegrees) {
+    motor2.previousDegrees = motor2.angleDegrees;
+    dynamicMotor2Angle.go(motor2.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
+  }
+  if (motor3.previousDegrees != motor3.angleDegrees) {
+    motor3.previousDegrees = motor3.angleDegrees;
+    dynamicMotor3Angle.go(motor3.angleDegrees, demandTime, LINEAR, ONCEFORWARD);
+  }
+
+};
+
+uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
+  
+  // update the dynamic endpoint in case there is a new demand endpoint
+  updateDynamicEndpoint();
+
+  if (motorID == M1) {
+      if (unit == DEGREES)
+        return dynamicMotor1Angle.update();
+      else if (unit == MILLIS)
+        return _degreesToMicros(dynamicMotor1Angle.update(), motor1.calibOffset);
+  }
+  else if (motorID == M2) {
+    if (unit == DEGREES)
+      return dynamicMotor2Angle.update();
+    else if (unit == MILLIS)
+      return _degreesToMicros(dynamicMotor2Angle.update(), motor2.calibOffset);
+  }
+  else if (motorID == M3) {
+    if (unit == DEGREES)
+      return dynamicMotor3Angle.update();
+    else if (unit == MILLIS)
+      return _degreesToMicros(dynamicMotor3Angle.update(), motor3.calibOffset);
+  }
+  return _degreesToMicros(90, 0);       // this should never happen, but if necessary, return 90 degrees (safe value for all motors)
+};
+
 
 void Kinematics::applyVerticalTranslation(uint16_t controllerInput) {
   
@@ -55,7 +124,7 @@ void Kinematics::applyVerticalTranslation(uint16_t controllerInput) {
     demandAngle3 = (M3_DEFAULT_ANGLE - demandAngle3) + M3_DEFAULT_ANGLE + M3_OFFSET;
 
 
-    // Step 5: apply motor angular constraints
+    // Step 5: constrain motor angles and round the output to reduce noise
     demandAngle2 = _applyConstraints(2, demandAngle2);
     demandAngle3 = _applyConstraints(3, demandAngle3);
 
@@ -100,7 +169,7 @@ double Kinematics::_applyConstraints(uint8_t motor, double demandAngle) {
       Serial.println("Motor argument in _apply constraints wrong, so constraints can't be applied! Terminating program.");
     while(1);         // terminate the program to avoid unpredictable movement (which could break stuff)
     return demandAngle;
-}
+};
 
 
 bool Kinematics::printStatusString() {
