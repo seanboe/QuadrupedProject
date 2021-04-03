@@ -45,14 +45,10 @@ uint16_t Kinematics::_degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset)
 
 void Kinematics::updateDynamicEndpoint() {
 
-  // Determine which demanded angle is largestand use this to compute demand time for interpolation to be completed.
-  // uint16_t demandTime = MAX_SPEED * max(max(motor1.angleDegrees, motor2.angleDegrees), motor3.angleDegrees);      //PROBLEM; SHOULD BE BASED ON ANGLES NEEDED TO TRAVEL
-
-  // uint16_t demandTime = 500;
   uint16_t motor1AngleDelta = abs(motor1.angleDegrees - motor1.previousDegrees);
   uint16_t motor2AngleDelta = abs(motor2.angleDegrees - motor2.previousDegrees);
   uint16_t motor3AngleDelta = abs(motor3.angleDegrees - motor3.previousDegrees);
-  uint16_t demandTime = lrint(MAX_SPEED_INVERSE * max(max(motor1AngleDelta, motor2AngleDelta), motor3AngleDelta));      //PROBLEM; SHOULD BE BASED ON ANGLES NEEDED TO TRAVEL
+  uint16_t demandTime = lrint(MAX_SPEED_INVERSE * max(max(motor1AngleDelta, motor2AngleDelta), motor3AngleDelta));
 
 
     // determine whether motor angles have been updated i.e. new end angle, and update final positions accordingly
@@ -101,31 +97,26 @@ void Kinematics::solveFtShldrLength(uint16_t controllerInput) {
   
   if ((_legID == LEG_2) || (_legID == LEG_3)) {
 
-    // Step 1: Map input to demand shoulder-foot length in cm
+    // Map input to demand shoulder-foot length in cm
     uint16_t demandShoulderToFoot = map(controllerInput, 0, 1023, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);         //MOVE THIS LINE SOMEWHERE ELSE
-// Serial.println(demandShoulderToFoot);
 
-    // Step 2: use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
+    // Use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
     double demandAngle3 = acos( ( pow(demandShoulderToFoot, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
     demandAngle3 = lrint( (demandAngle3 * 180) / PI);
 
-    // Step 3: use demandAngle3 to calculate for demandAngle2 (angle for M2)
-
+    // Use demandAngle3 to calculate for demandAngle2 (angle for M2)
     double demandAngle2 = lrint( (180 - demandAngle3) / 2 );
 
-
-    // Step 4: calculate final demand angles suited to motors
-
+    // Calculate final demand angles suited to motors
     demandAngle2 += M2_OFFSET;
     demandAngle3 = (M3_DEFAULT_ANGLE - demandAngle3) + M3_DEFAULT_ANGLE + M3_OFFSET;
 
 
-    // Step 5: constrain motor angles and round the output to reduce noise
+    // Constrain motor angles and round the output to reduce noise
     demandAngle2 = _applyConstraints(2, demandAngle2);
     demandAngle3 = _applyConstraints(3, demandAngle3);
 
-
-    // Step 6: set live motor angles to the newly calculated ones
+    // Set live motor angles to the newly calculated ones
 
     // motor 2:
     motor2.angleDegrees = demandAngle2;
@@ -162,7 +153,7 @@ double Kinematics::_applyConstraints(uint8_t motor, double demandAngle) {
   }
   else
     if (Serial)
-      Serial.println("Motor argument in _apply constraints wrong, so constraints can't be applied! Terminating program.");
+      Serial.println("Motor argument in _apply constraints wrong, so constraints can't be applied! Terminating program."); //need a better way to report error
     while(1);         // terminate the program to avoid unpredictable movement (which could break stuff)
     return demandAngle;
 };

@@ -38,6 +38,8 @@ void setup() {
 
 }
 
+bool up = true;
+
 void loop() {
     // leg2.printStatusString();
 
@@ -46,10 +48,20 @@ void loop() {
   // leg2.solveFtShldrLength(1000);
   // leg2.solveFtShldrLength(read());
 
-  if (Serial.available()) {
-    unsigned int amount = Serial.parseInt();
-    leg2.solveFtShldrLength(amount);
-  }
+  // if (Serial.available()) {
+  //   unsigned int amount = Serial.parseInt();
+  //   leg2.solveFtShldrLength(amount);
+  // }
+
+    if (micros() % 5000000 == 0) {
+      if (up == true) {
+        leg2.solveFtShldrLength(100);
+      }
+      else if (up == false) {
+        leg2.solveFtShldrLength(1000);
+      }    
+      up = !up;
+    }
 
 
     if (millis() % 10 == 0) {
