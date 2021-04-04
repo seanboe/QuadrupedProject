@@ -43,7 +43,7 @@ typedef enum {
 // motor angular offsets (0 position is different than what is assumed for triangle calcs)
 #define M1_OFFSET 90
 #define M2_OFFSET 90
-#define M3_OFFSET 0
+#define M3_OFFSET 90
 
 
 // motor angular limits (degrees)
@@ -53,8 +53,5 @@ typedef enum {
 #define M2_MIN 0
 #define M3_MAX 130     //130
 #define M3_MIN 45
-
-
-#define M3_DEFAULT_ANGLE 90     // this motor has a default, because it's movement isn't direct (desired movement = 90 - demandMovement + 90)
 
 #endif

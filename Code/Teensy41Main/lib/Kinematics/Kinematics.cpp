@@ -4,7 +4,6 @@
 
 Kinematics::Kinematics(uint8_t legID, uint16_t motor1CalibOffset, uint16_t motor1StartPos, uint16_t motor2CalibOffset, uint16_t motor2StartPos, uint16_t motor3CalibOffset, uint16_t motor3StartPos) {
   _legID = legID;
-  _shoulderFootLength = sqrt( (LIMB_2^2) + (LIMB_3^2) );   // default leg length
 
   // motor defintions
   motor1.angleDegrees = motor1StartPos;
@@ -66,6 +65,8 @@ void Kinematics::updateDynamicEndpoint() {
   }
 };
 
+
+
 uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
   
   // update the dynamic endpoint in case there is a new demand endpoint
@@ -93,44 +94,75 @@ uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
 };
 
 
-void Kinematics::solveFtShldrLength(uint16_t controllerInput) {
-  
-  if ((_legID == LEG_2) || (_legID == LEG_3)) {
 
-    // Map input to demand shoulder-foot length in cm
-    uint16_t demandShoulderToFoot = map(controllerInput, 0, 1023, SHOULDER_FOOT_MIN, SHOULDER_FOOT_MAX);         //MOVE THIS LINE SOMEWHERE ELSE
+void Kinematics::solveFtShldrLength(float demandFtShldr, float *demandAngle2, float *demandAngle3) {
 
     // Use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
-    double demandAngle3 = acos( ( pow(demandShoulderToFoot, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
-    demandAngle3 = lrint( (demandAngle3 * 180) / PI);
+    float _demandAngle3 = acos( ( pow(demandFtShldr, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
+    _demandAngle3 = ((_demandAngle3 * 180) / PI);   //convert to degrees
 
     // Use demandAngle3 to calculate for demandAngle2 (angle for M2)
-    double demandAngle2 = lrint( (180 - demandAngle3) / 2 );
+    float _demandAngle2 = ((180 - _demandAngle3) / 2 );
 
-    // Calculate final demand angles suited to motors
-    demandAngle2 += M2_OFFSET;
-    demandAngle3 = (M3_DEFAULT_ANGLE - demandAngle3) + M3_DEFAULT_ANGLE + M3_OFFSET;
+    *demandAngle2 += _demandAngle2;
+    *demandAngle3 += _demandAngle3;
+};
 
 
-    // Constrain motor angles and round the output to reduce noise
-    demandAngle2 = _applyConstraints(2, demandAngle2);
-    demandAngle3 = _applyConstraints(3, demandAngle3);
 
-    // Set live motor angles to the newly calculated ones
+void  Kinematics::solveForwardFootMove(int16_t inputX, int16_t inputZ, float *demandAngle2) {
 
-    // motor 2:
-    motor2.angleDegrees = demandAngle2;
-    motor2.angleMicros = _degreesToMicros(motor2.angleDegrees, motor2.calibOffset);
+  *demandAngle2 = ((atan((float)abs(inputX)/(float)abs(inputZ))*180) / PI);
 
-    // motor 3:
-    motor3.angleDegrees = demandAngle3;
-    motor3.angleMicros = _degreesToMicros(motor3.angleDegrees, motor3.calibOffset);
+  if (inputX > 0)
+    *demandAngle2 *= -1;
+};
 
-  }
+
+
+void Kinematics::solveFootPosition(int16_t inputX, int16_t inputY, int16_t inputZ) {
+  // float demandAngle1 = 0; // this angle isn't necessary (yet) for the currect calculations
+  float demandAngle2 = 0;
+  float demandAngle3 = 0;
+
+  //calculate the demand shoulder-foot length and determine whether it is possible to achieve
+  float demandFtShldrLength = sqrt(pow(abs(inputZ), 2) + pow(abs(inputX), 2));
+  if (demandFtShldrLength > SHOULDER_FOOT_MAX) 
+    demandFtShldrLength = SHOULDER_FOOT_MAX;
+  else if (demandFtShldrLength < SHOULDER_FOOT_MIN)
+    demandFtShldrLength = SHOULDER_FOOT_MIN;
+
+  solveForwardFootMove(inputX, inputZ, &demandAngle2);
+
+  solveFtShldrLength(demandFtShldrLength, &demandAngle2, &demandAngle3);
+
+  // Round off demand angles
+  demandAngle2 = lrint(demandAngle2);
+  demandAngle3 = lrint(demandAngle3);
+
+  // Calculate final demand angles suited to motors by applying necessary offsets
+  demandAngle2 += M2_OFFSET;
+  demandAngle3 = (M3_OFFSET - demandAngle3) + M3_OFFSET;
+
+  // Constrain motor angles
+  demandAngle2 = _applyConstraints(2, demandAngle2);
+  demandAngle3 = _applyConstraints(3, demandAngle3);
+
+  // Set live motor angles to the newly calculated ones
+
+  // motor 2:
+  motor2.angleDegrees = demandAngle2;
+  motor2.angleMicros = _degreesToMicros(motor2.angleDegrees, motor2.calibOffset);
+
+  // motor 3:
+  motor3.angleDegrees = demandAngle3;
+  motor3.angleMicros = _degreesToMicros(motor3.angleDegrees, motor3.calibOffset);
 
 };
 
-double Kinematics::_applyConstraints(uint8_t motor, double demandAngle) {
+
+
+float Kinematics::_applyConstraints(uint8_t motor, float demandAngle) {
   if (motor == 2) {
     if (demandAngle > M2_MAX){
       return M2_MAX;
@@ -157,6 +189,7 @@ double Kinematics::_applyConstraints(uint8_t motor, double demandAngle) {
     while(1);         // terminate the program to avoid unpredictable movement (which could break stuff)
     return demandAngle;
 };
+
 
 
 bool Kinematics::printStatusString() {

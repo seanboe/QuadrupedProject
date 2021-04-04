@@ -11,11 +11,13 @@ rampInt myRamp;
 uint16_t dynamicAngle;
 uint16_t demandAngle;
 
-Kinematics leg2(2, 150, 90, 125, 135, 55, 90);
+Kinematics leg2(2, 150, 90, 120, 135, 55, 90);
 Servo L2M2;
 Servo L2M3;
 
 float read();
+void calculateGait();
+float sinusoidGaits(int16_t xIn, int type);
 
 void setup() {
   Serial.begin(9600);
@@ -23,61 +25,92 @@ void setup() {
 
   pinMode(19, INPUT);
 
-  L2M2.attach(0);
-  L2M3.attach(1);
+  L2M2.attach(1);
+  L2M3.attach(2);
 
 
   // write primary positions to servos
+  // leg2.solveFootPosition(100, 0, 177);  
+  // L2M2.writeMicroseconds(leg2.motor2.angleMicros);
+  // L2M3.writeMicroseconds(leg2.motor3.angleMicros);
+  // while (1);
+
   L2M2.writeMicroseconds(leg2.motor2.angleMicros);
   L2M3.writeMicroseconds(leg2.motor3.angleMicros);
-  
+
   delay(3000);
 
-  myRamp.go(0);
-  myRamp.go(1000, 1000, LINEAR, FORTHANDBACK);
+  myRamp.go(-100);
+  myRamp.go(100, 750, LINEAR, FORTHANDBACK);
 
 }
 
-bool up = true;
-
 void loop() {
-    // leg2.printStatusString();
 
-  // leg2.solveFtShldrLength(analogRead(19));
-  // leg2.solveFtShldrLength(myRamp.update());
-  // leg2.solveFtShldrLength(1000);
-  // leg2.solveFtShldrLength(read());
+  calculateGait();
+
+  // leg2.solveFootPosition(myRamp.update(), 0, 177);
 
   // if (Serial.available()) {
   //   unsigned int amount = Serial.parseInt();
-  //   leg2.solveFtShldrLength(amount);
+  //   leg2.solveFootPosition(amount, 0, 177);
   // }
 
-    if (micros() % 5000000 == 0) {
-      if (up == true) {
-        leg2.solveFtShldrLength(100);
-      }
-      else if (up == false) {
-        leg2.solveFtShldrLength(1000);
-      }    
-      up = !up;
-    }
+    // if (millis() % 10 == 0) {
+    //   dynamicAngle = leg2.getDyamicAngle(M3, DEGREES);
+    //   demandAngle = leg2.motor3.angleDegrees;
+    //   Serial.println(dynamicAngle);
+    //   Serial.print(",");
+    //   Serial.println(demandAngle);
+    // }
 
-
-    if (millis() % 10 == 0) {
-      dynamicAngle = leg2.getDyamicAngle(M3, DEGREES);
-      demandAngle = leg2.motor3.angleDegrees;
-      Serial.println(dynamicAngle);
-      Serial.print(",");
-      Serial.println(demandAngle);
-    }
-    // L2M2.writeMicroseconds(leg2.motor2.angleMicros);
-    // L2M3.writeMicroseconds(leg2.motor3.angleMicros);
+    L2M2.writeMicroseconds(leg2.motor2.angleMicros);
+    L2M3.writeMicroseconds(leg2.motor3.angleMicros);
 
   // write calculated data to servos
-  L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
-  L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
+  // L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
+  // L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
 
+}
+
+
+void calculateGait() {
+  static int16_t xIn = -100;
+  static bool forwards = true;
+  int gait = 0;
+  if (micros() % 5000 == 0) {
+    if (forwards == true) {
+      // gait = (75*cos((PI * xIn)/200));
+      gait = (int)sinusoidGaits(xIn, 4);
+      Serial.println(gait);
+      leg2.solveFootPosition(xIn, 0, (177 - gait));
+      xIn += 1; 
+      if (xIn == 101)
+        forwards = false; 
+    }
+    else if (forwards == false) {
+      xIn -= 1;
+      leg2.solveFootPosition(xIn, 0, 177);
+      if (xIn == -100)
+        forwards = true;
+    }
+  }
+}
+
+
+float sinusoidGaits(int16_t xIn, int type) {
+  switch (type) {
+    case 1:
+      return (75*cos((PI * xIn)/200));
+    case 2: 
+      return (-0.0075*(pow(xIn, 2)-10000));
+    case 3: 
+      return (-0.002*(pow(xIn, 2)-10000));
+    case 4: 
+      return (30*cos((PI * xIn)/200));
+    default:
+      return 0.00;
+  }
 }
 
 
