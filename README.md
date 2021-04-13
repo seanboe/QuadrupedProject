@@ -1,3 +1,7 @@
+# This repository isn't used for development anymore! I've left it up just for testing, but new
+code (or CAD) won't be found here.
+
+
 # Quadruped Robot Project
 
 A repository to hold the cad and code of my club's quadruped robot project. 

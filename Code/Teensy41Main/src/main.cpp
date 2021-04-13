@@ -69,14 +69,14 @@ void loop() {
     //   Serial.println(demandAngle);
     // }
 
-    L2M1.writeMicroseconds(leg2.motor1.angleMicros);
-    L2M2.writeMicroseconds(leg2.motor2.angleMicros);
-    L2M3.writeMicroseconds(leg2.motor3.angleMicros);
+    // L2M1.writeMicroseconds(leg2.motor1.angleMicros);
+    // L2M2.writeMicroseconds(leg2.motor2.angleMicros);
+    // L2M3.writeMicroseconds(leg2.motor3.angleMicros);
 
   // write calculated data to servos
-  // L2M1.writeMicroseconds(leg2.getDyamicAngle(M1, MILLIS));
-  // L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
-  // L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
+  L2M1.writeMicroseconds(leg2.getDyamicAngle(M1, MILLIS));
+  L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
+  L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
 
 }
 
