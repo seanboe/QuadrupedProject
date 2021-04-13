@@ -29,7 +29,7 @@ typedef enum {
 //********* robot hardware constraints **********
 
 // limb length in millimeters
-#define LIMB_1  30
+#define LIMB_1  45
 #define LIMB_2  125
 #define LIMB_3  125
 
@@ -47,7 +47,7 @@ typedef enum {
 
 
 // motor angular limits (degrees)
-#define M1_MAX 135
+#define M1_MAX 120
 #define M1_MIN 45
 #define M2_MAX 270
 #define M2_MIN 0

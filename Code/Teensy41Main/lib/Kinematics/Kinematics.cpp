@@ -96,59 +96,95 @@ uint16_t Kinematics::getDyamicAngle(motorID motorID, unitType unit) {
 
 
 void Kinematics::solveFtShldrLength(float demandFtShldr, float *demandAngle2, float *demandAngle3) {
+  
+  float _demandFtShldrLength = demandFtShldr;
+  if (_demandFtShldrLength > SHOULDER_FOOT_MAX) 
+    _demandFtShldrLength = SHOULDER_FOOT_MAX;
+  else if (_demandFtShldrLength < SHOULDER_FOOT_MIN)
+    _demandFtShldrLength = SHOULDER_FOOT_MIN;
 
-    // Use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
-    float _demandAngle3 = acos( ( pow(demandFtShldr, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
-    _demandAngle3 = ((_demandAngle3 * 180) / PI);   //convert to degrees
+  // Use the Law of Cosines to solve for the angles of motor 3 and convert to degrees
+  float _demandAngle3 = acos( ( pow(demandFtShldr, 2) - pow(LIMB_2, 2) - pow(LIMB_3, 2) ) / (-2 * LIMB_2 * LIMB_3) ); // demand angle for position 3 (operated by M3)
+  _demandAngle3 = ((_demandAngle3 * 180) / PI);   //convert to degrees
 
-    // Use demandAngle3 to calculate for demandAngle2 (angle for M2)
-    float _demandAngle2 = ((180 - _demandAngle3) / 2 );
+  // Use demandAngle3 to calculate for demandAngle2 (angle for M2)
+  float _demandAngle2 = ((180 - _demandAngle3) / 2 );
 
-    *demandAngle2 += _demandAngle2;
-    *demandAngle3 += _demandAngle3;
+  *demandAngle2 += _demandAngle2;
+  *demandAngle3 += _demandAngle3;
 };
 
 
 
-void  Kinematics::solveForwardFootMove(int16_t inputX, int16_t inputZ, float *demandAngle2) {
+void  Kinematics::solveXMove(int16_t inputX, int16_t inputZ, float *demandAngle2, float *demandFtShldrLength) {
+  if (inputZ == 0)
+    inputZ = 1;   // you can never divide by 0!
+
+  *demandFtShldrLength = sqrt(pow((float)abs(inputZ), 2) + pow((float)abs(inputX), 2));
 
   *demandAngle2 = ((atan((float)abs(inputX)/(float)abs(inputZ))*180) / PI);
 
   if (inputX > 0)
-    *demandAngle2 *= -1;
+    *demandAngle2 *= -1;            // change later: make it negative if inputX is in the negative direction and parse it later
 };
 
 
 
+void Kinematics::solveYMove(int16_t inputY, int16_t inputZ, float *demandAngle1, float *yPlaneZOutput) {
+  float demandFtShldrLength = sqrt(pow((float)abs(inputZ), 2) + pow((float)abs(inputY), 2)); // foot-shoulder distance on y-z plane (L1 in diagram)
+  *yPlaneZOutput = sqrt(pow((float)abs(demandFtShldrLength), 2) - pow((float)abs(LIMB_1), 2));
+
+  // Here, theta is the angle closest to the axis of rotation in the triangle relating inputY and inputZ
+  // Alpha is the angle closest to the axis of rotation in the traingle relating leg length output to LIMB_1 length
+  float theta = (float)abs((((float)atan((float)inputY/(float)inputZ) * 180) / PI));
+  float alpha = (float)(((float)acos((float)LIMB_1/demandFtShldrLength) * 180) / PI);
+  if (inputY >= 0) {
+    *demandAngle1 += (float)abs((float)90 - (theta + alpha));
+  }
+  else if (inputY < 0) {
+    *demandAngle1 += (float)abs((float)90 - (alpha - theta));   // since both triangles (refer to drawings) have the same hypotenuse, alpha > theta for all inputY
+  }
+
+  if (inputY < LIMB_1)
+    *demandAngle1 *= -1;
+
+}
+
+
 void Kinematics::solveFootPosition(int16_t inputX, int16_t inputY, int16_t inputZ) {
-  // float demandAngle1 = 0; // this angle isn't necessary (yet) for the currect calculations
+  float demandAngle1 = 0;
   float demandAngle2 = 0;
   float demandAngle3 = 0;
 
-  //calculate the demand shoulder-foot length and determine whether it is possible to achieve
-  float demandFtShldrLength = sqrt(pow(abs(inputZ), 2) + pow(abs(inputX), 2));
-  if (demandFtShldrLength > SHOULDER_FOOT_MAX) 
-    demandFtShldrLength = SHOULDER_FOOT_MAX;
-  else if (demandFtShldrLength < SHOULDER_FOOT_MIN)
-    demandFtShldrLength = SHOULDER_FOOT_MIN;
+  float yPlaneZOutput = 0;  // this is the foot-shoulder distance on the y-z plane (L1 in diagram)
+  float demandFtShldrLength = 0;  // this is the foot-should distance on the x-z plane and the final calculated length
 
-  solveForwardFootMove(inputX, inputZ, &demandAngle2);
+  solveYMove(inputY, inputZ, &demandAngle1, &yPlaneZOutput);
+
+  solveXMove(inputX, yPlaneZOutput, &demandAngle2, &demandFtShldrLength);
 
   solveFtShldrLength(demandFtShldrLength, &demandAngle2, &demandAngle3);
 
   // Round off demand angles
+  demandAngle1 = lrint(demandAngle1);
   demandAngle2 = lrint(demandAngle2);
   demandAngle3 = lrint(demandAngle3);
 
   // Calculate final demand angles suited to motors by applying necessary offsets
+  demandAngle1 += M1_OFFSET;
   demandAngle2 += M2_OFFSET;
   demandAngle3 = (M3_OFFSET - demandAngle3) + M3_OFFSET;
 
   // Constrain motor angles
+  demandAngle1 = _applyConstraints(1, demandAngle1);
   demandAngle2 = _applyConstraints(2, demandAngle2);
   demandAngle3 = _applyConstraints(3, demandAngle3);
 
   // Set live motor angles to the newly calculated ones
+
+  //motor 1: 
+  motor1.angleDegrees = demandAngle1;
+  motor1.angleMicros = _degreesToMicros(motor1.angleDegrees, motor1.calibOffset);
 
   // motor 2:
   motor2.angleDegrees = demandAngle2;
@@ -163,7 +199,17 @@ void Kinematics::solveFootPosition(int16_t inputX, int16_t inputY, int16_t input
 
 
 float Kinematics::_applyConstraints(uint8_t motor, float demandAngle) {
-  if (motor == 2) {
+  if (motor == 1) {
+    if (demandAngle > M1_MAX){
+      return M1_MAX;
+    }
+    else if (demandAngle < M1_MIN){
+      return M1_MIN;
+    }
+    else
+      return demandAngle;
+  }
+  else if (motor == 2) {
     if (demandAngle > M2_MAX){
       return M2_MAX;
     }

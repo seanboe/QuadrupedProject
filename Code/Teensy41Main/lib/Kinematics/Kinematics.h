@@ -46,7 +46,10 @@ class Kinematics {
     void solveFtShldrLength(float demandFtShldr, float *demandAngle2, float *demandAngle3);
 
     // calculates M2 angle offset to achieve a foward translation in the x direction
-    void solveForwardFootMove(int16_t inputX, int16_t inputZ, float *demandAngle2);
+    void solveXMove(int16_t inputX, int16_t inputZ, float *demandAngle2, float *demandFtShldrLength);
+
+    // calculates M1 angle offset to achieve y-axis movement
+    void solveYMove(int16_t inputY, int16_t inputZ, float *demandAngle1, float *yPlaneZOutput);
 
     // general kinematics function; uses all positioning functions to place foot in 3d space
     void solveFootPosition(int16_t inputX, int16_t inputY, int16_t inputZ);

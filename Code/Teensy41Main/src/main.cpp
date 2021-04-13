@@ -11,7 +11,8 @@ rampInt myRamp;
 uint16_t dynamicAngle;
 uint16_t demandAngle;
 
-Kinematics leg2(2, 150, 90, 120, 135, 55, 90);
+Kinematics leg2(2, 60, 90, 120, 135, 55, 90);
+Servo L2M1;
 Servo L2M2;
 Servo L2M3;
 
@@ -25,6 +26,7 @@ void setup() {
 
   pinMode(19, INPUT);
 
+  L2M1.attach(0);
   L2M2.attach(1);
   L2M3.attach(2);
 
@@ -35,26 +37,29 @@ void setup() {
   // L2M3.writeMicroseconds(leg2.motor3.angleMicros);
   // while (1);
 
+  L2M1.writeMicroseconds(leg2.motor1.angleMicros);
   L2M2.writeMicroseconds(leg2.motor2.angleMicros);
   L2M3.writeMicroseconds(leg2.motor3.angleMicros);
 
   delay(3000);
 
-  myRamp.go(-100);
-  myRamp.go(100, 750, LINEAR, FORTHANDBACK);
+  myRamp.go(-30);
+  myRamp.go(125, 1500, LINEAR, FORTHANDBACK);
 
 }
 
 void loop() {
 
-  calculateGait();
+  // calculateGait();
 
-  // leg2.solveFootPosition(myRamp.update(), 0, 177);
+  static unsigned int amount = 0;
+  if (Serial.available()) {
+    amount = Serial.parseInt();
+    // leg2.solveFootPosition(0, amount, 177);
+  }
+    // leg2.solveFootPosition(amount, myRamp.update(), 177);
+    leg2.solveFootPosition(0, amount, 177);
 
-  // if (Serial.available()) {
-  //   unsigned int amount = Serial.parseInt();
-  //   leg2.solveFootPosition(amount, 0, 177);
-  // }
 
     // if (millis() % 10 == 0) {
     //   dynamicAngle = leg2.getDyamicAngle(M3, DEGREES);
@@ -64,10 +69,12 @@ void loop() {
     //   Serial.println(demandAngle);
     // }
 
+    L2M1.writeMicroseconds(leg2.motor1.angleMicros);
     L2M2.writeMicroseconds(leg2.motor2.angleMicros);
     L2M3.writeMicroseconds(leg2.motor3.angleMicros);
 
   // write calculated data to servos
+  // L2M1.writeMicroseconds(leg2.getDyamicAngle(M1, MILLIS));
   // L2M2.writeMicroseconds(leg2.getDyamicAngle(M2, MILLIS));
   // L2M3.writeMicroseconds(leg2.getDyamicAngle(M3, MILLIS));
 
