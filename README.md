@@ -1,10 +1,20 @@
-# This repository isn't used for development anymore! I've left it up just for testing, but new
-code (or CAD) won't be found here.
-
-
 # Quadruped Robot Project
 
-A repository to hold the cad and code of my club's quadruped robot project. 
+<p align="center">
+	[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/seanboe/QuadrupedHardware)
+	[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+</p>
+
+[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/seanboe/QuadrupedHardware)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+
+A repository to hold the code for my quadruped! Much of the math (inverse kinematics, gait planning, etc.)
+can be found in my [QuadrupedKinematics library](https://github.com/seanboe/QuadrupedKinematics). Also, the 
+hardware for the project (CAD and gerber files) can be found [here](https://github.com/seanboe/QuadrupedHardware).
+
+I'm also recording most of the progress for the project on my blog, which is [here](https://seanboe.github.io/blog/).
+
+(Please note that my code is currently organized a bit messy... this will be fixed later!)
 
 MIT License
 
