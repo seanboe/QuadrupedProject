@@ -1,36 +1,49 @@
-<p align="center">
-	<h1> Quadruped Robot Project </h1>
+<h1 align="center">
+  <br>
+  <a href="https://github.com/seanboe/QuadrupedProject"><img src="https://github.com/seanboe/QuadrupedProject/images/V1-1Front.png" alt="QuadrupedProject" width="200"></a>
+  <br>
+  Quadruped Project
+  <br>
+</h1>
+
+<p align="center"> 
+	A quest to make a simple and affordable, yet advanced, quadruped robot.
+	<br>
+	<br>
+	<a href="https://github.com/seanboe/QuadrupedProject"> <img src="https://img.shields.io/badge/License-MIT-green.svg"> </a>
+	<a href="https://github.com/seanboe/QuadrupedProject"> <img src="https://img.shields.io/badge/Maintained%3F-yes-orange.svg"> </a>
+	<a href="https://github.com/seanboe/QuadrupedProject"> <img src="https://badges.frapsoft.com/os/v1/open-source.svg?v=103"> </a>
 </p>
 
-[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/seanboe/QuadrupedHardware)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+### Software Setup
+This project is compiled and uploaded to a teensy 4.1 via [PlatformIO](https://platformio.org), an extension to VS code.
+Once you download <code>Code/Teensy41Main</code>, you should be able to open the folder by selecting <code>platformio.ini</code>.
+Assuming you have all dependent libraries installed, you should be able to run the code!
 
-A repository to hold the code for my quadruped! Much of the math (inverse kinematics, gait planning, etc.)
-can be found in my [QuadrupedKinematics library](https://github.com/seanboe/QuadrupedKinematics). Also, the 
-hardware for the project (CAD and gerber files) can be found [here](https://github.com/seanboe/QuadrupedHardware).
 
-I'm also recording most of the progress for the project on my blog, which is [here](https://seanboe.github.io/blog/).
+### Library dependencies
+To run this code, you'll need to install a few libraries for Arduino/Teensy.
+- [QuadrupedKinematics](https://github.com/seanboe/QuadrupedKinematics)
+	- [Servo](https://www.arduino.cc/reference/en/libraries/servo/)
+	- [RAMP](https://github.com/siteswapjuggler/RAMP)
+- [Radiohead](https://github.com/adafruit/RadioHead)
 
-(Please note that my code is currently organized a bit messy... this will be fixed later!)
+<i>Note that QuadrupedKinematics is a custom library; you will need to download it and place in the <code>lib</code>
+in you platformIO project folder (which you can download above)</i>
 
-MIT License
+### Hardware
+You can find the CAD files as a shared Fusion360 project [here](https://github.com/seanboe/QuadrupedProject) -yet to be updated (will do *ASAP*)
 
-Copyright (c) 2020 Sean Boerhout
+I've also designed a PCB for this robot:
+<img src="Hardware/PCBV1-0/layoutV1-0.png" height="200">
+Gerber files for version 1.0 can be found [here](https://github.com/seanboe/QuadrupedProject/Hardware)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+A Bill of Materials for the PCB and robot will be coming soon.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+I'm also recording most of the progress for the project on my blog, which is [here](https://seanboe.github.io/blog/),
+and I release short updates on my [YouTube Channel](https://www.youtube.com/channel/UCSMmECMAWD-FGQWWuThr7_w)
+
+### License
+
+[MIT](https://github.com/seanboe/QuadrupedProject/LICENSE)
