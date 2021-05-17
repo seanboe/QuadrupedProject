@@ -37,7 +37,7 @@ You can find the CAD files as a shared Fusion360 project [here](https://github.c
 I've also designed a PCB for this robot: <br>
 <img src="Hardware/PCBV1-0/layoutV1-0.png" height="200">
 <br>
-Gerber files for version 1.0 can be found [here](https://github.com/seanboe/QuadrupedProject/Hardware)
+Gerber files for version 1.0 can be found <a href="Hardware">here</a>.
 
 A Bill of Materials for the PCB and robot will be coming soon.
 
@@ -47,4 +47,4 @@ and I release short updates on my [YouTube Channel](https://www.youtube.com/chan
 
 ### License
 
-[MIT](https://github.com/seanboe/QuadrupedProject/LICENSE)
+<a href="LICENSE">MIT</a>
