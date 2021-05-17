@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/seanboe/QuadrupedProject"><img src="https://github.com/seanboe/QuadrupedProject/images/V1-1Front.png" alt="QuadrupedProject" width="200"></a>
+  <a href="https://github.com/seanboe/QuadrupedProject"><img src="images/V1-1Front.png" alt="QuadrupedProject" width="200"></a>
   <br>
   Quadruped Project
   <br>
@@ -34,8 +34,9 @@ in you platformIO project folder (which you can download above)</i>
 ### Hardware
 You can find the CAD files as a shared Fusion360 project [here](https://github.com/seanboe/QuadrupedProject) -yet to be updated (will do *ASAP*)
 
-I've also designed a PCB for this robot:
+I've also designed a PCB for this robot: <br>
 <img src="Hardware/PCBV1-0/layoutV1-0.png" height="200">
+<br>
 Gerber files for version 1.0 can be found [here](https://github.com/seanboe/QuadrupedProject/Hardware)
 
 A Bill of Materials for the PCB and robot will be coming soon.
