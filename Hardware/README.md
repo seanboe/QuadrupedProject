@@ -1,8 +1,6 @@
-# QuadrupedHardware
+# Hardware
 
-[![MIT license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/seanboe/QuadrupedHardware)
-
-A repo that contains hardware files for my quadruped project, including CAD and gerber files. 
+This is where all my custom hardware is posted. Gerbers for control board V1.0 is already available, and CAD files will be released shortly.
 
 ## Quadruped Control Board V1.0
 
