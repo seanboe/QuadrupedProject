@@ -1,6 +1,6 @@
 ## Quadruped Remote Controller
 
-<p align="center"><img src="../../images/quadController.png" alt="QuadrupedProject" width="300"></p>
+<p align="center"><img src="../../images/quadController.png" alt="QuadrupedProject" width="500"></p>
 
 This is a __temporary__ controller for the quadruped built on a breadboard with two joysticks and two buttons. A future project will be to design a PCB to make a PS4 style, arduino compatible remote, but that's for later. 
 
@@ -15,12 +15,12 @@ If you want to make it, you'll need:
 
 ### Pinouts:
 
-| Teensy 4.0    | RFM69HCW || Teensy 4.0| Joystick Left|| Teensy 4.0| Joystick Right|
-| ------------- | ------------- || ------------- | ------------- || ------------- | ------------- |
-| 3V|VIN||GND|GND||GND|GND|
-| GND|GND||3V|+5V||3V|+5V|
-| NC|EN||15|VRx||16|VRx|
-|3|G0||14|VRy||16|VRy|
+| Teensy 4.0    | RFM69HCW |&nbsp;| Teensy 4.0| Joystick Left|&nbsp;| Teensy 4.0| Joystick Right|
+| :-------------: | :-------------: |&nbsp;| :-------------: | :-------------: |&nbsp;| :-------------: | :-------------: |
+| 3V|VIN|&nbsp;|GND|GND|&nbsp;|GND|GND|
+| GND|GND|&nbsp;|3V|+5V|&nbsp;|3V|+5V|
+| NC|EN|&nbsp;|15|VRx|&nbsp;|16|VRx|
+|3|G0|&nbsp;|14|VRy|&nbsp;|16|VRy|
 |13|SCK|
 |12|MISO|
 |11|MOSI|
