@@ -1,6 +1,6 @@
 ## Quadruped Remote Controller
 
-<p align="center"><img src=".../images/quadController.png" alt="QuadrupedProject" width="300"></p>
+<p align="center"><img src="../images/quadController.png" alt="QuadrupedProject" width="300"></p>
 
 This is a __temporary__ controller for the quadruped built on a breadboard with two joysticks and two buttons. A future project will be to design a PCB to make a PS4 style, arduino compatible remote, but that's for later. 
 
