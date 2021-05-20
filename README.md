@@ -35,7 +35,7 @@ in you platformIO project folder (which you can download above)</i>
 You can find the CAD files as a shared Fusion360 project [here](https://github.com/seanboe/QuadrupedProject) -yet to be updated (will do *ASAP*)
 
 I've also designed a PCB for this robot: <br>
-<img src="Hardware/PCBV1-0/layoutV1-0.png" height="200">
+<a href="https://github.com/seanboe/QuadrupedProject/tree/master/Hardware"><img src="Hardware/PCBV1-0/layoutV1-0.png" height="200"></a>
 <br>
 Gerber files for version 1.0 can be found <a href="Hardware">here</a>.
 
