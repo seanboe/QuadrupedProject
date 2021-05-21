@@ -3,5 +3,8 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-lib/Kinematics
-include/RadioHead
+
+lib/QuadrupedKinematics
+lib/DataTransfer
+
+include
