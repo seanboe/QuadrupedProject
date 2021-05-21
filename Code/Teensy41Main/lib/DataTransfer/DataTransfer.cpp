@@ -47,8 +47,18 @@ bool Transfer::init() {
 
 
 void Transfer::write(BIT_OR_BYTE bitOrByte, int index, int value) {
-  if (bitOrByte == BIT)
-    _dataArray[((int)ceil(((index - (index % 8))/8)))] += BITS[index % 8];
+  if (bitOrByte == BIT) {
+    switch(value) {
+      case 0: 
+        if (read(BIT, index)) 
+          _dataArray[((int)ceil(((index - (index % 8))/8)))] -= BITS[index % 8];
+        break;
+      case 1: 
+        if (!read(BIT, index))
+          _dataArray[((int)ceil(((index - (index % 8))/8)))] += BITS[index % 8];
+        break;
+    }
+  }
   else if (bitOrByte == BYTE) {
     _dataArray[index] = value;
   }
