@@ -20,7 +20,7 @@ If you want to make it, you'll need:
 | 3V|VIN|GND|GND|GND|GND|
 | GND|GND|3V|+5V|3V|+5V|
 | NC|EN|15|VRx|16|VRx|
-|3|G0|14|VRy|16|VRy|
+|3|G0|14|VRy|17|VRy|
 |13|SCK|
 |12|MISO|
 |11|MOSI|
@@ -35,3 +35,5 @@ The 5V boost is set up to provide the teensy with 5V for wireless controlling.
 ### Library dependencies:
 To run my code, you'll need the [RadioHead Library](https://github.com/adafruit/RadioHead). Create an <code>include</code> folder in the 
 QuadController directory and place the library in there. 
+
+Also, I'm using the DataTransfer library here; I'm not giving it its own repo because it's quite simple, so I'm including it here. You can find it in <code>lib</code> (this is *exactly* the same as the one in <code>Teensy41Main</code>)
