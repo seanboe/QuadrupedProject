@@ -65,6 +65,8 @@ void loop() {
   dataBuffer.write(BYTE, JOYR_X_ANALOG, filterAnalog(map(analogRead(JOYR_X_PIN), 0, 1023, 0, 255), TOLERANCE));
   dataBuffer.write(BYTE, JOYR_Y_ANALOG, filterAnalog(map(analogRead(JOYR_Y_PIN), 0, 1023, 0, 255), TOLERANCE));
 
+  dataBuffer.send();
+
 }
 
 uint8_t filterAnalog(uint8_t value, int tolerance) {
