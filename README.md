@@ -32,7 +32,7 @@ To run this code, you'll need to install a few libraries for Arduino/Teensy.
 in you platformIO project folder (which you can download above)</i>
 
 ### Hardware
-You can find the CAD files as a shared Fusion360 project [here](https://github.com/seanboe/QuadrupedProject) -yet to be updated (will do *ASAP*)
+You can find the CAD files in .step format [here](https://github.com/seanboe/QuadrupedProject) -will update *very soon*
 
 I've also designed a PCB for this robot: <br>
 <a href="https://github.com/seanboe/QuadrupedProject/tree/master/Hardware"><img src="Hardware/PCBV1-0/layoutV1-0.png" height="200"></a>
