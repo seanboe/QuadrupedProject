@@ -34,6 +34,9 @@ in you platformIO project folder (which you can download above)</i>
 ### Hardware
 You can find the CAD files in .step format [here](https://github.com/seanboe/QuadrupedProject) -will update _*very soon*_
 
+A BOM (Bill of Materials) will be coming shortly too, once I've actually finished building this thing.
+
+
 I've also designed a PCB for this robot: <br>
 <a href="https://github.com/seanboe/QuadrupedProject/tree/master/Hardware"><img src="Hardware/PCBV1-0/layoutV1-0.png" height="200"></a>
 <br>
