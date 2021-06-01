@@ -13,7 +13,7 @@ It's done! Note that I haven't had the chance to test it yet (the board hasn't a
 - Includes 12 breakouts for all servos
 - On-board IMU data (via an [LSM6DSOX](https://www.st.com/resource/en/datasheet/lsm6dsox.pdf))
 - Battery capacity monitoring (via an [LC709203F](https://www.onsemi.com/pdf/datasheet/lc709203f-d.pdf))
-- LoRA radio 
+- LoRA radio -900Mhz
 - Motor power shutoff capability
 - Controlled by a Teensy 4.1
 - Battery power/USB power selection for Teensy
