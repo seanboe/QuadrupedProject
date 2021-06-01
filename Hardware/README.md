@@ -18,3 +18,7 @@ It's done! Note that I haven't had the chance to test it yet (the board hasn't a
 - Controlled by a Teensy 4.1
 - Battery power/USB power selection for Teensy
 - 6 breakout GPIO, including an I2C bus and associated power/ground lines
+
+*Known issues with v1.0* 😭
+- Holes for header pins are too small to allow them to comfortably fit. You will need to "jam" them in or solder on top of the hole.
+- xt-60 connector +/- is flipped (silkscreen outline is wrong). Simply flip the connector on the board, or solder the wires reverse for the male connector that goes onto the board. 
