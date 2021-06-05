@@ -29,21 +29,21 @@ To run this code, you'll need to install a few libraries for Arduino/Teensy.
 - [Radiohead](https://github.com/adafruit/RadioHead)
 
 <i>Note that QuadrupedKinematics is a custom library; you will need to download it and place in the <code>lib</code>
-in you platformIO project folder (which you can download above)</i>
+in your platformIO project folder (which you can download above)</i>
 
 ### Hardware
 You can find the CAD files in .step format [here](https://github.com/seanboe/QuadrupedProject) -will update _*very soon*_
 
-A BOM (Bill of Materials) will be coming shortly too, once I've actually finished building this thing.
+A bill of materials (BOM) can be found [here](https://github.com/seanboe/QuadrupedProject/tree/master/Hardware) as a .numbers file or
+[here](https://docs.google.com/spreadsheets/d/18XhNiGI3mZoEecLmq4_vx1SQUpdlzQzPsUQPOoMVXBk/edit#gid=0) as a google spreadsheet.
+
+This doesn't include components for the PCB yet. 
 
 
 I've also designed a PCB for this robot: <br>
 <a href="https://github.com/seanboe/QuadrupedProject/tree/master/Hardware"><img src="Hardware/PCBV1-0/layoutV1-0.png" height="200"></a>
 <br>
 Gerber files for version 1.0 can be found <a href="Hardware">here</a>.
-
-A Bill of Materials for the PCB and robot will be coming soon.
-
 
 I'm also recording most of the progress for the project on my blog, which is [here](https://seanboe.github.io/blog/),
 and I release short updates on my [YouTube Channel](https://www.youtube.com/channel/UCSMmECMAWD-FGQWWuThr7_w)
