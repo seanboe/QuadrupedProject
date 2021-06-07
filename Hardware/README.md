@@ -22,3 +22,8 @@ It's done! Note that I haven't had the chance to test it yet (the board hasn't a
 *Known issues with v1.0* 😭
 - Holes for header pins are too small to allow them to comfortably fit. You will need to "jam" them in or solder on top of the hole.
 - xt-60 connector +/- is flipped (silkscreen outline is wrong). Simply flip the connector on the board, or solder the wires reverse for the male connector that goes onto the board. 
+- miniBoost and LoRA radio header holes are flipped (they are the mirror image of what they should be) 😂
+
+### Final Verdict:
+Do __NOT__ use this 😂 
+The PWM works (sensors yet to be tested), but there are too many mistakes for me to be adequately proud of it. A NEW VERSION IS COMING!
