@@ -37,8 +37,7 @@ You can find the CAD files in .step format [here](https://github.com/seanboe/Qua
 A bill of materials (BOM) can be found [here](https://github.com/seanboe/QuadrupedProject/tree/master/Hardware) as a .numbers file or
 [here](https://docs.google.com/spreadsheets/d/18XhNiGI3mZoEecLmq4_vx1SQUpdlzQzPsUQPOoMVXBk/edit#gid=0) as a google spreadsheet.
 
-This doesn't include components for the PCB yet. 
-
+This doesn't include components for the PCB yet (I'm designing a new one)
 
 I've also designed a PCB for this robot: <br>
 <a href="https://github.com/seanboe/QuadrupedProject/tree/master/Hardware"><img src="Hardware/PCBV1-0/layoutV1-0.png" height="200"></a>
