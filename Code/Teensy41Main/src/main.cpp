@@ -10,6 +10,10 @@ rampInt myRamp;
 #include <DataTransfer.h>
 #include "dataEnums.h"
 
+#define RELAY_PIN   33
+
+
+
 //Radio Encryption Key
 uint8_t key[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 
@@ -36,18 +40,24 @@ float sinusoidGaits(int16_t xIn, int type);
 void setup() {
   Serial.begin(9600);
   while (!Serial)
-    ;
+    delay(10);
 
-  dataBuffer.init();
-  Serial.println("initialization complete");
+  // dataBuffer.init();
+  // Serial.println("initialization complete");
 
-  L2M1.attach(9);
-  L2M2.attach(8);
-  L2M3.attach(7);
+  // Activate motors
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
+  Serial.println("Relay activated");
+  delay(5000);
+  Serial.println("Relay engaged");
 
-  // write primary positions to servos
 
-  // leg2.solveFootPosition(DEFAULT_X, DEFAULT_Y, DEFAULT_Z);
+  L2M1.attach(23);
+  L2M2.attach(22);
+  L2M3.attach(15);
+
+  // write primary servo positions
   L2M1.writeMicroseconds(leg2.motor1.angleMicros);
   L2M2.writeMicroseconds(leg2.motor2.angleMicros);
   L2M3.writeMicroseconds(leg2.motor3.angleMicros);
