@@ -6,12 +6,6 @@
 // The motor struct definition and various enums are defined inside here
 #include <Kinematics.h>
 
-// Function definitions
-void initMotorVals(Motor _motors[]);
-uint16_t indexOfMotor(LegID leg, MotorID motor);
-int16_t constrainAngles(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle);
-int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle);
-
 //Leg 1:
 extern Motor L1M1;
 extern Motor L1M2;
@@ -39,5 +33,22 @@ typedef enum {
   M2_standard, M2_mirrored,
   M3_standard, M3_mirrored
 } ContexType;
+
+typedef enum {
+  DEGREES, MILLIS
+} unitType;
+
+typedef enum {
+  DYNAMIC, STATIC
+} ActivityType;
+
+// Function definitions
+void initMotorVals(Motor _motors[]);
+uint16_t indexOfMotor(LegID leg, MotorID motor);
+int16_t constrainAngle(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle);
+int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle);
+uint16_t degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset);
+int16_t getPreparedAngles(Motor _motors[], LegID legID, MotorID motorID, unitType angleUnitType, ActivityType activityType);
+
 
 #endif

@@ -45,8 +45,9 @@ void initMotorVals(Motor _motors[]) {
   _motors[10] = L4M2;
   _motors[11] = L4M3;
 
+
+
   // Leg 2
-    _motors[indexOfMotor(LEG_2, M1)].angleDegrees = 23; //TESTESTSETSETSETSLTKJA;FLKJAD;LFKJASD ;OFIJAWO;EIFJEIJKDMVNFBK JHUEIJKDMVBDSJHVUIG O
   _motors[indexOfMotor(LEG_2, M1)].controlPin = 23;
   _motors[indexOfMotor(LEG_2, M1)].calibOffset = 60;
   _motors[indexOfMotor(LEG_2, M1)].maxPos = 120;
@@ -70,14 +71,14 @@ void initMotorVals(Motor _motors[]) {
 
 uint16_t indexOfMotor(LegID leg, MotorID motor) {
   return ((leg - 1) * MOTORS_PER_LEG + motor) - 1;
-};
+}
 
-int16_t constrainAngles(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle) {
+int16_t constrainAngle(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle) {
   if (demandAngle > _motors[indexOfMotor(legID, motorID)].maxPos)
     return _motors[indexOfMotor(legID, motorID)].maxPos;
   else if (demandAngle < _motors[indexOfMotor(legID, motorID)].minPos)
     return _motors[indexOfMotor(legID, motorID)].minPos;
-  return 0;
+  return demandAngle;
 }
 
 // This applies the offsets for the motors based on CONTEXT.
@@ -90,7 +91,8 @@ int16_t constrainAngles(Motor _motors[], LegID legID, MotorID motorID, int16_t d
 
 int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int16_t demandAngle) {
   ContexType contexType = M1_standard;
-  int16_t angle = 0;
+  // int16_t demandAngle = _motors[indexOfMotor(legID, motorID)].angleDegrees;
+  int16_t angle = demandAngle;
 
   switch (legID) {
 
@@ -99,46 +101,63 @@ int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int
         case M1: contexType = M1_mirrored; break;
         case M2: contexType = M2_mirrored; break;
         case M3: contexType = M3_mirrored; break;
-      }
-      break;
-
+      } break;
     case LEG_2:
       switch (motorID) {
         case M1: contexType = M1_standard; break;
         case M2: contexType = M2_standard; break;
         case M3: contexType = M3_standard; break;
-      }
-      break;
-
+      } break;
     case LEG_3:
       switch (motorID) {
         case M1: contexType = M1_mirrored; break;
         case M2: contexType = M2_standard; break;
         case M3: contexType = M3_standard; break;
-      }
-      break;
-
+      } break;
     case LEG_4:
       switch (motorID) {
         case M1: contexType = M1_standard; break;
         case M2: contexType = M2_mirrored; break;
         case M3: contexType = M3_mirrored; break;
-      }
-      break;
+      } break;
+
   }
 
   switch (contexType) {
 
-    case M1_standard: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset + demandAngle; break;
-    case M1_mirrored: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset - demandAngle; break;
+    case M1_standard: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset + angle; break;
+    case M1_mirrored: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset - angle; break;
 
-    case M2_standard: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset + demandAngle; break;
+    case M2_standard: angle =  _motors[indexOfMotor(legID, motorID)].applicationOffset + angle; break;
     case M2_mirrored: angle =  90 - demandAngle; break;
 
-    case M3_standard: angle = (2 * _motors[indexOfMotor(legID, motorID)].applicationOffset) - demandAngle; break;
-    case M3_mirrored: angle =  demandAngle; break;
+    case M3_standard: angle = (2 * _motors[indexOfMotor(legID, motorID)].applicationOffset) - angle; break;
+    case M3_mirrored: angle =  angle; break;
   }
 
-  angle = constrainAngles(_motors, legID, motorID, angle);
+  angle = constrainAngle(_motors, legID, motorID, angle);
   return angle;
 };
+
+uint16_t degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset) {
+  int microsecondsInput = ((7.5 * inputDegrees) + 500 + calibOffset);    // 500 is a "magic number" of micros for the motors; before that they do nothing
+  return microsecondsInput;
+};
+
+
+// All-in-one function. Gets the 
+int16_t getPreparedAngles(Motor _motors[], LegID legID, MotorID motorID, unitType angleUnitType, ActivityType activityType) {
+
+  int16_t angle = 0;
+
+  // The prepared angle in contex
+  if (activityType == DYNAMIC)
+    angle = applyContextualOffset(_motors, legID, motorID, _motors[indexOfMotor(legID, motorID)].dynamicDegrees);
+  else if (activityType == STATIC)
+    angle = applyContextualOffset(_motors, legID, motorID, _motors[indexOfMotor(legID, motorID)].angleDegrees);
+
+  if (angleUnitType == MILLIS) {
+    return degreesToMicros(angle, motors[indexOfMotor(legID, motorID)].calibOffset);
+  }
+  return angle;
+}
