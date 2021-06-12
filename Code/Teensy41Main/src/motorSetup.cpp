@@ -45,9 +45,26 @@ void initMotorVals(Motor _motors[]) {
   _motors[10] = L4M2;
   _motors[11] = L4M3;
 
+  // ********************** LEG 1 **********************
+  _motors[indexOfMotor(LEG_1, M1)].controlPin = 14;
+  _motors[indexOfMotor(LEG_1, M1)].calibOffset = 0;
+  _motors[indexOfMotor(LEG_1, M1)].maxPos = 135;
+  _motors[indexOfMotor(LEG_1, M1)].minPos = 30;
+  _motors[indexOfMotor(LEG_1, M1)].applicationOffset = 90;
 
+  _motors[indexOfMotor(LEG_1, M2)].controlPin = 37;
+  _motors[indexOfMotor(LEG_1, M2)].calibOffset = 80;
+  _motors[indexOfMotor(LEG_1, M2)].maxPos = 270;
+  _motors[indexOfMotor(LEG_1, M2)].minPos = 0;
+  _motors[indexOfMotor(LEG_1, M2)].applicationOffset = 0;
 
-  // Leg 2
+  _motors[indexOfMotor(LEG_1, M3)].controlPin = 36;
+  _motors[indexOfMotor(LEG_1, M3)].calibOffset = 10;
+  _motors[indexOfMotor(LEG_1, M3)].maxPos = 130;
+  _motors[indexOfMotor(LEG_1, M3)].minPos = 45;
+  _motors[indexOfMotor(LEG_1, M3)].applicationOffset = 0;
+
+  // ********************** LEG 2 **********************
   _motors[indexOfMotor(LEG_2, M1)].controlPin = 23;
   _motors[indexOfMotor(LEG_2, M1)].calibOffset = 60;
   _motors[indexOfMotor(LEG_2, M1)].maxPos = 120;
@@ -65,6 +82,44 @@ void initMotorVals(Motor _motors[]) {
   _motors[indexOfMotor(LEG_2, M3)].maxPos = 130;
   _motors[indexOfMotor(LEG_2, M3)].minPos = 45;
   _motors[indexOfMotor(LEG_2, M3)].applicationOffset = 90;
+
+  // ********************** LEG 3 **********************
+  _motors[indexOfMotor(LEG_3, M1)].controlPin = 0;
+  _motors[indexOfMotor(LEG_3, M1)].calibOffset = 35;
+  _motors[indexOfMotor(LEG_3, M1)].maxPos = 135;
+  _motors[indexOfMotor(LEG_3, M1)].minPos = 30;
+  _motors[indexOfMotor(LEG_3, M1)].applicationOffset = 90;
+
+  _motors[indexOfMotor(LEG_3, M2)].controlPin = 1;
+  _motors[indexOfMotor(LEG_3, M2)].calibOffset = 45;
+  _motors[indexOfMotor(LEG_3, M2)].maxPos = 270;
+  _motors[indexOfMotor(LEG_3, M2)].minPos = 0;
+  _motors[indexOfMotor(LEG_3, M2)].applicationOffset = 90;
+
+  _motors[indexOfMotor(LEG_3, M3)].controlPin = 2;
+  _motors[indexOfMotor(LEG_3, M3)].calibOffset = 0;
+  _motors[indexOfMotor(LEG_3, M3)].maxPos = 130;
+  _motors[indexOfMotor(LEG_3, M3)].minPos = 45;
+  _motors[indexOfMotor(LEG_3, M3)].applicationOffset = 90;
+
+  // ********************** LEG 4 **********************
+  _motors[indexOfMotor(LEG_4, M1)].controlPin = 3;
+  _motors[indexOfMotor(LEG_4, M1)].calibOffset = 80;
+  _motors[indexOfMotor(LEG_4, M1)].maxPos = 120;
+  _motors[indexOfMotor(LEG_4, M1)].minPos = 45;
+  _motors[indexOfMotor(LEG_4, M1)].applicationOffset = 90;
+
+  _motors[indexOfMotor(LEG_4, M2)].controlPin = 4;
+  _motors[indexOfMotor(LEG_4, M2)].calibOffset = 70;
+  _motors[indexOfMotor(LEG_4, M2)].maxPos = 270;
+  _motors[indexOfMotor(LEG_4, M2)].minPos = 0;
+  _motors[indexOfMotor(LEG_4, M2)].applicationOffset = 0;
+
+  _motors[indexOfMotor(LEG_4, M3)].controlPin = 5;
+  _motors[indexOfMotor(LEG_4, M3)].calibOffset = 70;
+  _motors[indexOfMotor(LEG_4, M3)].maxPos = 130;
+  _motors[indexOfMotor(LEG_4, M3)].minPos = 45;
+  _motors[indexOfMotor(LEG_4, M3)].applicationOffset = 0;
 }
 
 
@@ -139,13 +194,14 @@ int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int
   return angle;
 };
 
+
 uint16_t degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset) {
   int microsecondsInput = ((7.5 * inputDegrees) + 500 + calibOffset);    // 500 is a "magic number" of micros for the motors; before that they do nothing
   return microsecondsInput;
 };
 
 
-// All-in-one function. Gets the 
+// All-in-one function
 int16_t getPreparedAngles(Motor _motors[], LegID legID, MotorID motorID, unitType angleUnitType, ActivityType activityType) {
 
   int16_t angle = 0;
