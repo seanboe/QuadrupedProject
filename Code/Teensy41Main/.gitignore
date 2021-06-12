@@ -7,4 +7,5 @@
 lib/QuadrupedKinematics
 lib/DataTransfer
 
-include
+src/tests.txt
+
