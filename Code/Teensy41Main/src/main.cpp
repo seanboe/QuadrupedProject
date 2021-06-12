@@ -1,49 +1,56 @@
 #include <Arduino.h>
 
 #include <Kinematics.h>
+#include <motorSetup.h> // Holds the stuff for constraining, offsetting, and initializing the motor values
 
 #include <Servo.h>
 
 #include "Ramp.h"
-rampInt myRamp;
 
-#include <DataTransfer.h>
-#include "dataEnums.h"
+
+// default axis lengths (the 'safe' position for all the motors)
+#define DEFAULT_X 0
+#define DEFAULT_Y 45    // This is the same as LIMB_1; I want the foot to be directly under the shoulder ie straight, not under the bearing
+#define DEFAULT_Z 177   // This is the foot-shoulder length when the leg makes a 45-45-90 triangle
 
 #define RELAY_PIN   33
 
 
-
-//Radio Encryption Key
-uint8_t key[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-
-
-RH_RF69 rf69(RFM69_CS, RFM69_INT);
-Transfer dataBuffer(&rf69, BUFFER_SIZE, key);
-
-uint16_t dynamicAngle;
-uint16_t demandAngle;
-
-
 // Kinematics leg2(2, 60, 90, 120, 135, 55, 90); // This sets the initial leg position too
-Kinematics leg2(2, DEFAULT_X, DEFAULT_Y, DEFAULT_Z, 60, 120, 55);
-Servo L2M1;
-Servo L2M2;
-Servo L2M3;
+Kinematics leg2(LEG_2, DEFAULT_X, DEFAULT_Y, DEFAULT_Z, motors);
+Servo L2M1_SERVO;
+Servo L2M2_SERVO;
+Servo L2M3_SERVO;
 
 
-uint8_t parseControllerData(BIT_OR_BYTE bitOrByte, int index);
+// ******************************* LEG STRUCTURE DECLRATION ********************************
+//Leg 1:
+Motor L1M1;
+Motor L1M2;
+Motor L1M3;
 
-void calculateGait();
-float sinusoidGaits(int16_t xIn, int type);
+//Leg 2:
+Motor L2M1;
+Motor L2M2;
+Motor L2M3;
+
+//Leg 2:
+Motor L3M1;
+Motor L3M2;
+Motor L3M3;
+
+//Leg 2:
+Motor L4M1;
+Motor L4M2;
+Motor L4M3;
+
+Motor motors[ROBOT_LEG_COUNT * MOTORS_PER_LEG];
+
 
 void setup() {
   Serial.begin(9600);
   while (!Serial)
     delay(10);
-
-  // dataBuffer.init();
-  // Serial.println("initialization complete");
 
   // Activate motors
   pinMode(RELAY_PIN, OUTPUT);
@@ -52,15 +59,24 @@ void setup() {
   delay(5000);
   Serial.println("Relay engaged");
 
+  initMotorVals(motors);
 
-  L2M1.attach(23);
-  L2M2.attach(22);
-  L2M3.attach(15);
+  L2M1_SERVO.attach(23);
+  L2M2_SERVO.attach(22);
+  L2M3_SERVO.attach(15);
 
   // write primary servo positions
-  L2M1.writeMicroseconds(leg2.motor1.angleMicros);
-  L2M2.writeMicroseconds(leg2.motor2.angleMicros);
-  L2M3.writeMicroseconds(leg2.motor3.angleMicros);
+  // L2M1_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M1, motors[indexOfMotor(LEG_2, M1)].angleDegrees));
+  // L2M2_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M2, motors[indexOfMotor(LEG_2, M2)].angleDegrees));
+  // L2M3_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M3, motors[indexOfMotor(LEG_2, M3)].angleDegrees));
+
+  Serial.println(motors[indexOfMotor(LEG_2, M1)].angleDegrees);
+  Serial.println(motors[indexOfMotor(LEG_2, M2)].angleDegrees);
+  Serial.println(motors[indexOfMotor(LEG_2, M3)].angleDegrees);
+
+  Serial.println(applyContextualOffset(motors, LEG_2, M1, motors[indexOfMotor(LEG_2, M1)].angleDegrees));
+  Serial.println(applyContextualOffset(motors, LEG_2, M2, motors[indexOfMotor(LEG_2, M2)].angleDegrees));
+  Serial.println(applyContextualOffset(motors, LEG_2, M3, motors[indexOfMotor(LEG_2, M3)].angleDegrees));
 
   delay(3000);
 
@@ -78,59 +94,40 @@ void loop() {
   } 
       // leg2.solveFootPosition(0, amount, 177);
 
-      leg2.setFootEndpoint(amount, 45, DEFAULT_Z);
+  //   leg2.setFootEndpoint(amount, 45, DEFAULT_Z);
 
 
-    leg2.updateDynamicFootPosition();
+  //   leg2.updateDynamicFootPosition();
 
-    L2M1.writeMicroseconds(leg2.motor1.dynamicMicros);
-    L2M2.writeMicroseconds(leg2.motor2.dynamicMicros);
-    L2M3.writeMicroseconds(leg2.motor3.dynamicMicros);
+  // L2M1_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M1, motors[indexOfMotor(LEG_2, M1)].dynamicMicros));
+  // L2M2_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M2, motors[indexOfMotor(LEG_2, M2)].dynamicMicros));
+  // L2M3_SERVO.writeMicroseconds(applyContextualOffset(motors, LEG_2, M3, motors[indexOfMotor(LEG_2, M3)].dynamicMicros));
 
 }
 
 
-// void calculateGait() {
-//   static int16_t xIn = -100;
-//   static bool forwards = true;
-//   int gait = 0;
-//   if (micros() % 5000 == 0) {
-//     if (forwards == true) {
-//       // gait = (75*cos((PI * xIn)/200));
-//       gait = (int)sinusoidGaits(xIn, 4);
-//       Serial.println(gait);
-//       leg2.solveFootPosition(xIn, 0, (177 - gait));
-//       xIn += 1; 
-//       if (xIn == 101)
-//         forwards = false; 
-//     }
-//     else if (forwards == false) {
-//       xIn -= 1;
-//       leg2.solveFootPosition(xIn, 0, 177);
-//       if (xIn == -100)
-//         forwards = true;
-//     }
-//   }
+
+
+
+
+
+
+
+
+
+// ///  
+// Kinematics leg1(1, motorList)
+// leg1.setFootEndpoint(x, y, z)
+
+// Kinematics legs(motorList)
+// for leg in legs:
+//   leg.setFootEndPoints()
+
+// Kine::Kine(motors) {
+//   int length = sizeof()
+//   for (i = 0; i < length; i++)
+//     motors[i].angleDegrees = 10;
 // }
 
 
-float sinusoidGaits(int16_t xIn, int type) {
-  switch (type) {
-    case 1:
-      return (75*cos((PI * xIn)/200));
-    case 2: 
-      return (-0.0075*(pow(xIn, 2)-10000));
-    case 3: 
-      return (-0.002*(pow(xIn, 2)-10000));
-    case 4: 
-      return (30*cos((PI * xIn)/200));
-    default:
-      return 0.00;
-  }
-}
-
-
-uint8_t parseControllerData(BIT_OR_BYTE bitOrByte, int index) {
-  dataBuffer.receive();
-  return dataBuffer.read(bitOrByte, index);
-}
+// ///
