@@ -6,6 +6,9 @@
 // The motor struct definition and various enums are defined inside here
 #include <Kinematics.h>
 
+// degrees to microseconds sale factor (determined experimentally, MUST be the same for every motor)
+#define DEGREES_TO_MICROS 7.5
+
 //Leg 1:
 extern Motor L1M1;
 extern Motor L1M2;

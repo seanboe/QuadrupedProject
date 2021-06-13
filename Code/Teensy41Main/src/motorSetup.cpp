@@ -8,9 +8,7 @@
 //   // Angle/calculation stuff
 //   int16_t angleDegrees;
 //   int16_t previousDegrees;     // previous degrees since last call to updateDynamicPositions()
-//   int16_t angleMicros;
 //   int16_t dynamicDegrees;
-//   int16_t dynamicMicros;
 
 //   // Calibration
 //   uint16_t calibOffset;         // This is an offset for calibration (to keep the motor accurate)
@@ -196,7 +194,7 @@ int16_t applyContextualOffset(Motor _motors[], LegID legID, MotorID motorID, int
 
 
 uint16_t degreesToMicros(uint8_t inputDegrees, uint8_t calibOffset) {
-  int microsecondsInput = ((7.5 * inputDegrees) + 500 + calibOffset);    // 500 is a "magic number" of micros for the motors; before that they do nothing
+  int microsecondsInput = ((DEGREES_TO_MICROS * inputDegrees) + 500 + calibOffset);    // 500 is a "magic number" of micros for the motors; before that they do nothing
   return microsecondsInput;
 };
 
