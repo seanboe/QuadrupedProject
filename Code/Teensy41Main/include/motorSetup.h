@@ -31,6 +31,11 @@ extern Motor L4M3;
 
 extern Motor motors[ROBOT_LEG_COUNT * MOTORS_PER_LEG];
 
+
+// Whether a motor is standard or mirrored depends on whether its final 
+// angle is calculated like the motors in leg 2. Standard motors have a 
+// contextual offset calculated like motors in leg 2, mirrored motors have
+// have a contextual offset calculated like leg 1 (mirrored to leg 2)
 typedef enum {
   M1_standard, M1_mirrored,
   M2_standard, M2_mirrored,
