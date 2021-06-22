@@ -15,19 +15,15 @@
 #define BUTTON_RIGHT_PIN  22
 
 // Filter parameters
-#define TOLERANCE 2
-#define JOYSTICK_ZERO 128   // mapped value; 0-1023 to 0-255
+#define TOLERANCE       2
+#define JOYSTICK_CENTER 128 // mapped value; 0-1023 to 0-255
 
 //Radio Encryption Key
-uint8_t key[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+const byte radioKey[6] = "00001";
 
+Transfer dataBuffer(21, 20, BUFFER_SIZE);
 
-// Instantiate Radio Object
-RH_RF69 rf69(RFM69_CS, RFM69_INT);
-// Instantiate Buffer Object
-Transfer dataBuffer(&rf69, BUFFER_SIZE, key);
-
-uint8_t filterAnalog(uint8_t value, int tolerance);
+uint8_t filterAnalog(uint8_t value, uint8_t tolerance);
 
 
 void setup() {
@@ -41,7 +37,7 @@ void setup() {
   pinMode(BUTTON_RIGHT_PIN, INPUT_PULLUP);
 
   Serial.begin(9600);
-  dataBuffer.init();
+  dataBuffer.init(0, TRANSMITTER, radioKey);
 
 }
 
@@ -52,26 +48,28 @@ void loop() {
 
   dataBuffer.write(BIT, BUTTON_LEFT, (!digitalRead(BUTTON_LEFT_PIN) ? 1 : 0));
   dataBuffer.write(BIT, BUTTON_RIGHT, (!digitalRead(BUTTON_RIGHT_PIN) ? 1 : 0));
-  dataBuffer.write(BIT, JOYL_X, ((filterAnalog(map(analogRead(JOYL_X_PIN), 0, 1023, 0, 255), TOLERANCE) != 128) ? 1 : 0 ));
-  dataBuffer.write(BIT, JOYL_Y, ((filterAnalog(map(analogRead(JOYL_Y_PIN), 0, 1023, 0, 255), TOLERANCE) != 128) ? 1 : 0 ));
-  dataBuffer.write(BIT, JOYR_X, ((filterAnalog(map(analogRead(JOYR_X_PIN), 0, 1023, 0, 255), TOLERANCE) != 128) ? 1 : 0 ));
-  dataBuffer.write(BIT, JOYR_Y, ((filterAnalog(map(analogRead(JOYR_Y_PIN), 0, 1023, 0, 255), TOLERANCE) != 128) ? 1 : 0 ));
+  dataBuffer.write(BIT, JOYL_X, ((filterAnalog(map(analogRead(JOYL_X_PIN), 0, 1023, 255, 0), TOLERANCE) != JOYSTICK_CENTER) ? 1 : 0 ));
+  dataBuffer.write(BIT, JOYL_Y, ((filterAnalog(map(analogRead(JOYL_Y_PIN), 0, 1023, 255, 0), TOLERANCE) != JOYSTICK_CENTER) ? 1 : 0 ));
+  dataBuffer.write(BIT, JOYR_X, ((filterAnalog(map(analogRead(JOYR_X_PIN), 0, 1023, 255, 0), TOLERANCE) != JOYSTICK_CENTER) ? 1 : 0 ));
+  dataBuffer.write(BIT, JOYR_Y, ((filterAnalog(map(analogRead(JOYR_Y_PIN), 0, 1023, 255, 0), TOLERANCE) != JOYSTICK_CENTER) ? 1 : 0 ));
 
 
   // The next 4 bytes are for holding analog joystick data (in that order) if their respective bits are high
 
-  dataBuffer.write(BYTE, JOYL_X_ANALOG, filterAnalog(map(analogRead(JOYL_X_PIN), 0, 1023, 0, 255), TOLERANCE));
-  dataBuffer.write(BYTE, JOYL_Y_ANALOG, filterAnalog(map(analogRead(JOYL_Y_PIN), 0, 1023, 0, 255), TOLERANCE));
-  dataBuffer.write(BYTE, JOYR_X_ANALOG, filterAnalog(map(analogRead(JOYR_X_PIN), 0, 1023, 0, 255), TOLERANCE));
-  dataBuffer.write(BYTE, JOYR_Y_ANALOG, filterAnalog(map(analogRead(JOYR_Y_PIN), 0, 1023, 0, 255), TOLERANCE));
+  dataBuffer.write(BYTE, JOYL_X_ANALOG, filterAnalog(map(analogRead(JOYL_X_PIN), 0, 1023, 255, 0), TOLERANCE));
+  dataBuffer.write(BYTE, JOYL_Y_ANALOG, filterAnalog(map(analogRead(JOYL_Y_PIN), 0, 1023, 255, 0), TOLERANCE));
+  dataBuffer.write(BYTE, JOYR_X_ANALOG, filterAnalog(map(analogRead(JOYR_X_PIN), 0, 1023, 255, 0), TOLERANCE));
+  dataBuffer.write(BYTE, JOYR_Y_ANALOG, filterAnalog(map(analogRead(JOYR_Y_PIN), 0, 1023, 255, 0), TOLERANCE));
 
   dataBuffer.send();
 
+  delay(100);
+
 }
 
-uint8_t filterAnalog(uint8_t value, int tolerance) {
-  if (abs(value - JOYSTICK_ZERO) > TOLERANCE)
+uint8_t filterAnalog(uint8_t value, uint8_t tolerance) {
+  if (abs(value - JOYSTICK_CENTER) > TOLERANCE)
     return value;
   else 
-    return JOYSTICK_ZERO;
+    return JOYSTICK_CENTER;
 }
