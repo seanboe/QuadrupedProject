@@ -2,13 +2,15 @@
 
 #include <quadruped.h>
 #include <motorSetup.h> // Holds the stuff for constraining, offsetting, and initializing the motor values
-
 #include <Servo.h>
 
-#include "Ramp.h"
+#include <DataTransfer.h>
+#include "dataEnums.h"
+
+#include <Ramp.h>
 
 // default axis lengths (the 'safe' position for all the motors)
-#define DEFAULT_X -40
+#define DEFAULT_X -30
 #define DEFAULT_Y 0    // This is the same as LIMB_1; I want the foot to be directly under the shoulder ie straight, not under the bearing
 #define DEFAULT_Z 177
 // #define DEFAULT_Z 177   // This is the foot-shoulder length when the leg makes a 45-45-90 triangle
@@ -56,9 +58,16 @@ Servo L4M3_SERVO;
 
 
 Quadruped robot;
-rampInt rampX;
-rampInt rampY;
 
+const byte radioKey[6] = "00001";
+Transfer controllerData(21, 20, BUFFER_SIZE);
+
+#define JOYSTICK_ANALOG_CENTER  128
+#define JOYSTICK_DESIRED_CENTER 0
+
+int8_t parseControllerData(uint8_t controllerData) {
+  return (int8_t)(controllerData - JOYSTICK_ANALOG_CENTER);
+}
 
 void setup() {
   Serial.begin(9600);
@@ -72,13 +81,11 @@ void setup() {
   delay(1000);
   Serial.println("Relay engaged");
 
-
-  // Setup motors and initialize kinematics library
   initMotorVals(motors);
-
   robot.init(DEFAULT_X, DEFAULT_Y, DEFAULT_Z, motors);
-  rampX.go(-50);
-  // rampY.go(50);
+
+  controllerData.init(0, RECEIVER, radioKey);
+
 
   L1M1_SERVO.attach(motors[indexOfMotor(LEG_1, M1)].controlPin);
   L1M2_SERVO.attach(motors[indexOfMotor(LEG_1, M2)].controlPin);
@@ -115,48 +122,36 @@ void setup() {
 
   Serial.println();
 
-  // Serial.println(applyContextualOffset(motors, LEG_1, M1, motors[indexOfMotor(LEG_1, M1)].angleDegrees));
-  // Serial.println(applyContextualOffset(motors, LEG_1, M2, motors[indexOfMotor(LEG_1, M2)].angleDegrees));
-  // Serial.println(applyContextualOffset(motors, LEG_1, M3, motors[indexOfMotor(LEG_1, M3)].angleDegrees));
-
-  // Serial.println(applyContextualOffset(motors, LEG_2, M1, motors[indexOfMotor(LEG_2, M1)].angleDegrees));
-  // Serial.println(applyContextualOffset(motors, LEG_2, M2, motors[indexOfMotor(LEG_2, M2)].angleDegrees));
-  // Serial.println(applyContextualOffset(motors, LEG_2, M3, motors[indexOfMotor(LEG_2, M3)].angleDegrees));
-
   delay(3000);
-
-  rampX.go(50, 10000, LINEAR, FORTHANDBACK);
-  // rampY.go(-50, 3000, LINEAR, FORTHANDBACK);
-
 }
 
 bool stop = false;
 
 void loop() {
 
-  // calculateGait();
+controllerData.receive();
 
-  static int amount = 0;
-  if (Serial.available()) {
-    amount = Serial.parseInt();
-    // leg2.solveFootPosition(0, amount, 177);        // below
-    // leg2.setFootEndpoint(amount, 45, DEFAULT_Z);
-  } 
+robot.walk(parseControllerData(controllerData.read(BYTE, JOYL_Y_ANALOG)), parseControllerData(controllerData.read(BYTE, JOYL_X_ANALOG)));
 
-if (amount != 0 && stop != true) {
-  // robot.walk(rampX.update(), 50);
-  robot.walk(0, 50);
-}
-  // robot.walk(0,0);
-  // robot.walk(50, -100);
-else if (amount == 0)
-  robot.walk(0, 0);
-// if (((millis() % 15000) == 0) || stop == true) {
-//     robot.walk(0, 0);
-//   stop = true;
+//   static int amount = 0;
+//   if (Serial.available()) {
+//     amount = Serial.parseInt();
+//   } 
+
+// if (amount != 0 && stop != true) {
+//   // robot.walk(rampX.update(), 50);
+//   robot.walk(0, 50);
 // }
+//   // robot.walk(0,0);
+//   // robot.walk(50, -100);
+// else if (amount == 0)
+//   robot.walk(0, 0);
+// // if (((millis() % 15000) == 0) || stop == true) {
+// //     robot.walk(0, 0);
+// //   stop = true;
+// // }
 
-  // robot.walk(rampX.update(), 50);
+//   // robot.walk(rampX.update(), 50);
 
 
 
@@ -176,10 +171,6 @@ else if (amount == 0)
   L4M2_SERVO.writeMicroseconds(getPreparedAngles(motors, LEG_4, M2, MILLIS, STATIC));
   L4M3_SERVO.writeMicroseconds(getPreparedAngles(motors, LEG_4, M3, MILLIS, STATIC));
 }
-
-
-
-
 
 
 
