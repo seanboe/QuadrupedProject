@@ -1,5 +1,9 @@
 # Hardware
 
+## _Stay Tuned for Version 2!!!!!!!!!!!!!!!!!!_
+__It will very likely feature a [BNO055 chip](https://www.bosch-sensortec.com/products/smart-sensors/bno055/), a BEATIFUL IMU with on-board 9-axis fusion for absolute orientation. I am reallllyyyy
+looking forward to this!__
+
 This is where all my custom hardware is posted. Gerbers for control board V1.0 is already available, and CAD files will be released shortly.
 
 ## Quadruped Control Board V1.0
