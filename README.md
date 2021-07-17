@@ -50,3 +50,7 @@ and I release short updates on my [YouTube Channel](https://www.youtube.com/chan
 ### License
 
 <a href="LICENSE">MIT</a>
+
+### Other
+Please note that most of the development for this project is done in the [QuadrupedKinematics](https://github.com/seanboe/QuadrupedKinematics)
+repository. This is where most of the control processes and math is stored. 
